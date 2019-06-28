@@ -1,0 +1,36 @@
+### Calculate LD (R^2) using vcftools
+
+#### within chromosomes
+## from phased haplotypes
+$ vcftools --vcf populations.haps.vcf --out Tge.R2.hap --hap-r2
+## from SNPs
+$ vcftools --vcf populations.snps.vcf --out Tge.R2.snp --geno-r2
+
+#### between chromosomes
+## from phased haplotypes
+$ vcftools --vcf populations.haps.vcf --out Tge.crR2.hap --interchrom-hap-r2
+## from SNPs
+$ vcftools --vcf populations.snps.vcf --out Tge.crR2.snp --interchrom-geno-r2
+
+### To analyse the R2 values, we need the allele frequency
+vcftools --vcf populations.snps.vcf --freq --out alf.snp
+vcftools --vcf populations.haps.vcf --freq --out alf.hap
+
+
+
+$ vcftools --vcf populations.snps.vcf --freq --out test3
+$ awk '{ print $6 }' Tge.crR2.snp.interchrom.geno.ld > scaf.crR2
+$ sed -i 's/5_Tge_b3v08_scaf//g' scaf.frq
+## now change with nano the name of the columns ##
+
+## in R
+> 
+> 
+
+
+
+
+
+
+#### Calculate sites under Hardy&Weinberg equilibrium
+$ vcftools --vcf populations.snps.vcf --out Tge --hardy

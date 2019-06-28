@@ -1,0 +1,40 @@
+## RAD analyses ##
+
+
+useful paths:
+reference genomes > ftp://ftpmrr.unil.ch/AsexGenomeEvol/timema/
+
+1) Remove reads that failed Casava files
+	script: removereads.sh
+
+2) Read quality
+	script: fastqc.sh
+
+3) Check that the barcode and the RAD cutsite are intact, and demultiplexing of the data.
+	script: process_stacks.sh
+
+4) cloneFilter to remove PCR duplicates # I won't need this, since there wasn't a step to mark the PCR duplicates.
+	skip this step
+
+5) Alignment : BWA better than bowtie (that leaves mores reads out, but test which is best)
+	script: 05-mapreads.sh
+
+
+	helpful oneliners:
+	- repeat the same line 88 times in a file
+while read line; do for i in {1..88}; do echo "$line"; done; done < inds.end > file
+
+
+6) SAMTOOLS: sort, filter only aligned reads and index samples (read groups are added during the bwa alignment)
+	script: 06-sortfilter.sh
+
+7) filter MAPQ > 30
+
+8) Call SNPs
+
+
+
+
+
+
+https://github.com/enormandeau/stacks_workflow/tree/master/00-scripts

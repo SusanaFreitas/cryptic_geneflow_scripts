@@ -1,0 +1,13 @@
+### How to run structure from the RAD data
+
+### Input file
+Populations can produce the input file. There are some things that we need to take into account:
+1) Whether we selected the option --write_single_snp
+
+From the STACKS manual:
+*Data for STRUCTURE is exported by supplying the --structure command line option to the populations program. Since STRUCTURE does*
+*not want linked loci, you will typically also supply the --write_single_snp flag so that you do not get more than one SNP per RAD*
+*locus (SNPs at the same RAD locus are almost certainly linked). If you aligned your data to a reference genome you may also want*
+*to use the --ordered_export option, because if two RAD loci overlap in the genome, this option will ensure that only one of the*
+*overlapping SNPs is output, again ensuring SNPs are not linked. A file will be output with a name similar*
+*to populations.structure.tsv.*
