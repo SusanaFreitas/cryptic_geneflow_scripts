@@ -1,0 +1,12 @@
+read.vcfR("populations.snps.vcf", limit = 1e+07, nrows = -1, skip = 0, cols = NULL,
+  convertNA = TRUE, checkFile = TRUE, check_keys = TRUE, verbose = TRUE)
+  
+  
+  
+  ## how many RAD loci did the full analysis produce
+  cat populations.sumstats.tsv | tail -n +4 | cut -f 2 | uniq | wc -l
+  Tge 9221
+  Tms 4320
+  
+  
+  bcftools view -H cichlid.vcf | wc -l
