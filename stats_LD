@@ -34,3 +34,18 @@ $ sed -i 's/5_Tge_b3v08_scaf//g' scaf.frq
 
 #### Calculate sites under Hardy&Weinberg equilibrium
 $ vcftools --vcf populations.snps.vcf --out Tge --hardy
+
+
+
+
+
+
+### Calculate sites under Selection (?)
+# BayeScan, a Bayesian method for detecting candidate SNPs by estimating the posterior probability
+# of SNP markers being under selection based on alternative models with and without selection
+# (Foll & Gaggiotti, 2008). We ran BayeScan for 10,000 iterations and a burn‐in of 200,000 steps.
+# We set the prior odds of neutrality parameter (pr_odds) to 10,000 based on recommendations from
+# Lotterhos and Whitlock (2014). This parameter represents the prior probability of a locus being
+# under selection (Foll & Gaggiotti, 2008), and Lotterhos and Whitlock (2014) showed that prior odds
+# equal to 10,000 resulted in lower error rates compared with prior odds equal to 10, 100 or 1,000.
+# We defined a false discovery rate (FDR) q‐value threshold of 0.01. (From Xuereb et al 2018)

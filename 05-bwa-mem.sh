@@ -34,6 +34,11 @@ done
 # -t no of threads
 # -R complete read group header line. E.g. ’@RG\tID:foo\tSM:bar’
 # -M Mark shorter split hits as secondary (for Picard compatibility)
+# 5.  Multiple mapping:
+# 1 When one segment is present in multiple lines to represent a multiple mapping of the segment,only one of these records should
+#  have the secondary alignment flag bit (0x100) unset. RNEXT and PNEXT point to the primary line of the next read in the template.
+# 2 SEQ and QUAL of secondary alignments should be set to ‘*’ to reduce the file size.
+
 
 ###  Convert the alignment into a .sam file
 #bwa samse reference.fa out.sai s_1.txt > out.sam

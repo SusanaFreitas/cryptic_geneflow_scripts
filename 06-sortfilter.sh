@@ -25,9 +25,16 @@ done
 # -u Output uncompressed BAM. This option saves time spent on compression/decompression and is thus preferred when the output is piped t$
 # -h Include the header in the output.
 
+
+
 # -b Output in the BAM format.
 # -F  Do not output alignments with any bits set in INT present in the FLAG field. INT can be specified in hex by beginning with `0x' (i$
 # -q Skip alignments with MAPQ smaller than INT [0].
+# 5.  Multiple mapping:
+# 1 When one segment is present in multiple lines to represent a multiple mapping of the segment,only one of these records should
+#  have the secondary alignment flag bit (0x100) unset. RNEXT and PNEXT point to the primary line of the next read in the template.
+# 2 SEQ and QUAL of secondary alignments should be set to ‘*’ to reduce the file size.
+
 
 ## remove temp files
 rm *.bam.bai
@@ -41,4 +48,9 @@ done
 # for file in *bam; do
 #        samtools flagstat $file >> $file-flagstat.txt
 # done
+
+
+## filter reads by size
+module load UHTS/Analysis/BBMap/37.82
+module rm UHTS/Analysis/BBMap/37.82
 

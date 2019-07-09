@@ -28,13 +28,28 @@ while read line; do for i in {1..88}; do echo "$line"; done; done < inds.end > f
 6) SAMTOOLS: sort, filter only aligned reads and index samples (read groups are added during the bwa alignment)
 	script: 06-sortfilter.sh
 
-7) filter MAPQ > 30
+7.1 ) STACKS
 
-8) Call SNPs
+filter MAPQ > 30
 
+Call SNPs
 
+7.2 ) freebayes
+- Freebayes does not call only SNPS. The vcf will have to be filtered:
+	- keep Only SNPs (break MNPs - multi nucleotide polymorphisms- into SNPs)
+$ vcflib vcfallelicprimitives Tge.fb.vcf > Tge.fb.filtmult.vcf
+	- keep Only biallelic SNPs
+grep -v 'TYPE=snp,' Tge.fb.filtmult.vcf > Tge.fb.bial.vcf
+	- keep reads DP > 10
+	- QUAL > 30 : prob of incorrect read = 1 in 1000; base call accuracy = 99.9% 
+	- Use vcffilter
+$ vcflib  vcffilter -f "DP > 10" -g "GQ > 30" Tge.fb.bial.vcf > Tge.fb.filt.vcf
+vcflib  vcffilter -f -g "GQ > 30" Tge.fb.bial.vcf > Tge.fb.filtg.vcf
 
 
 
 
 https://github.com/enormandeau/stacks_workflow/tree/master/00-scripts
+
+
+
