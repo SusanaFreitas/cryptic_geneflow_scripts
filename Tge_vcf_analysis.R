@@ -247,11 +247,11 @@ manhattan.plot<-function(chr, pos, pvalue,
 		chr <- chr[,drop=T]
 	}
 
-	#make sure positions are in kbp
+	# make sure positions are in kbp
 	if (any(pos>1e6)) pos<-pos/1e6;
 
-	#calculate absolute genomic position
-	#from relative chromosomal positions
+	# calculate absolute genomic position
+	# from relative chromosomal positions
 	posmin <- tapply(pos,chr, min);
 	posmax <- tapply(pos,chr, max);
 	posshift <- head(c(0,cumsum(posmax)),-1);
@@ -262,7 +262,7 @@ manhattan.plot<-function(chr, pos, pvalue,
 		return(p)
 	}
 
-	#parse annotations
+	# parse annotations
 	grp <- NULL
 	ann.settings <- list()
 	label.default<-list(x="peak",y="peak",adj=NULL, pos=3, offset=0.5, 
@@ -352,7 +352,7 @@ manhattan.plot<-function(chr, pos, pvalue,
 	rm(pos, pvalue)
 	gc()
 
-	#custom axis to print chromosome names
+	# custom axis to print chromosome names
 	axis.chr <- function(side,...) {
 		if(side=="bottom") {
 			panel.axis(side=side, outside=T,
@@ -369,7 +369,7 @@ manhattan.plot<-function(chr, pos, pvalue,
 		}
 	 }
 
-	#make sure the y-lim covers the range (plus a bit more to look nice)
+	# make sure the y-lim covers the range (plus a bit more to look nice)
 	prepanel.chr<-function(x,y,...) { 
 		A<-list();
 		maxy<-ceiling(max(y, ifelse(!is.na(sig.level), sig.level, 0)))+.5;
@@ -502,13 +502,13 @@ mrg <- merge(LD2,frq,by="new2")
 ########################################################################################
 ### use for all analyses FREEBAYES output vcf
 
-
-
-
+setwd("/home/susana/Dropbox/Timema_cryptic_geneflow/genevievae/FB_output")
+# use library vcfR
+library(vcfR)
 
 ## read vcf file
-vcf <- read.vcfR("Tge.fb.vcf") #read in all data
-vcf2 <- read.vcfR("corrected_output_allxuniq.vcf") #read in all data
+vcf <- read.vcfR("Tge.missfilt.recode.vcf") #read in all data
+# vcf2 <- read.vcfR("corrected_output_allxuniq.vcf") #read in all data
 head(vcf) #check the vcf object
 vcf@fix[1:10,1:5] #check
 
@@ -518,18 +518,17 @@ gff <- read.table("5_Tge_b3v06.max_arth_b2g_droso_b2g.gff", sep="\t", quote="")
 ## read sequence file (this is very heavy!!)
 dna <- ape::read.dna("5_Tge_b3v08.fasta", format = "fasta")
 
-
 ## plot statistics summed over entire VCF
-chrom <- create.chromR(name='Tge_RAD', vcf=vcf3)
+chrom <- create.chromR(name='Tge_RADfb', vcf=vcf)
 plot(chrom) # plot the data
 
 #quick check read depth distribution per individual
-dp <- extract.gt(vcf3, element='DP', as.numeric=TRUE)
+dp <- extract.gt(vcf, element='DP', as.numeric=TRUE)
 
 par(mar=c(8,4,1,1))
 boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", las=2, cex=0.4, cex.axis=0.5)
 
-###plot read depth distribution per individual
+### plot read depth distribution per individual
 pdf(file="Tge_readdepth.pdf")
 par(mar=c(8,4,1,1))
 boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", las=2, cex=0.4, cex.axis=0.5, ylim=c(0,50))

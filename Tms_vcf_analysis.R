@@ -27,7 +27,6 @@ library(ggmap)
 
 ### make a PCA plot
 
-
 Tms <- read.genepop("populations.snps.gen", quiet = TRUE)
 # Allele presence absencedata are extracted and NAs replaced usingtab:
 X <- tab(Tms, NA.method="mean")
@@ -460,4 +459,161 @@ ggplot(frq, aes(x = new2, y = freq_p, col = freq_p)) +
 ## The plots look very similar. Will try a correlation between R^2 and allelic frequency
 # first I need to merge both dataframes by new
 mrg <- merge(LD2,frq,by="new2")
+
+
+
+
+
+### plot the flagstat values of read alignment before and after filtering
+setwd('/home/susana/Dropbox/Timema_cryptic_geneflow/monikensis')
+x <- read.table(file='flagstat.total', header=TRUE)
+
+
+# plot the data
+library(ggplot2)
+ggplot(x, aes(x = files)) + 
+ geom_line(aes(y = total, group = filter, col = filter), linetype = "dashed") +
+ geom_line(aes(y = mapped, group = filter, col = filter)) +
+ geom_point(aes(y = total, group = filter, col = filter)) +
+ geom_point(aes(y = mapped, group = filter, col = filter), shape = 0) +
+ theme(axis.text.x = element_text(angle = 90))
+ 
+## plot the melt version of the dataset
+library(reshape2)
+xmelt <- melt(x, id.vars = c("files", "filter"), measure.vars = c("total", "mapped")
+
+ggplot(xmelt, aes(x = files, y = value, group = filter)) + 
+ geom_point(aes(col = filter, shape=variable)) +
+ theme(axis.text.x = element_text(angle = 90))
+
+## calculate proportion reads lost/mapped
+x$p_read_total <- x$p_read_total
+x$p_read_mapped
+y <- c()
+for (sample in unique(xmelt$files)) {
+ line_total <- subset(xmelt, files==sample & filter=="map" & variable=='total')
+ dig <- line_total[,4]
+ print(dig)
+ print(sample)
+ line_map <- subset(xmelt, files==sample & filter=="trim3_map" & variable=='total')
+ y$name <- sample
+ y$p_total <- line_total - line_map
+ }
+
+subset(xmelt, filter=="map" & variable=='total')
+
+
+
+
+
+
+
+
+
+
+########################################################################################################
+################################# PLOT READ DEPTH AND OTHER VCF STATS ##################################
+########################################################################################################
+
+
+## plot DP for the first vcf produced by freebayes (before any filtering)
+vcfpre <- read.vcfR('Tms.fb.vcf')
+dp_pre <- extract.gt(vcfpre, element = "DP", as.numeric=TRUE)
+dp_pre[1:4,1:6]
+## set the plot parameters: margin size
+par(mar=c(4,4,4,2))
+boxplot(dp_pre, col=2:8, las=3)
+pdf(file='Tms.fb.DP.pdf', height = 5, width = 10)
+pdf(file='Tms.fb.DP-lowx.pdf', height = 5, width = 10)
+boxplot(dp_pre, las=3, col=c("indianred3", "darkgoldenrod1", "cyan3", "hotpink3", "olivedrab3", "orangered3"),
+         ylab="Read Depth (DP)", cex=0.6, cex.axis=0.8)
+boxplot(dp_pre, las=3, col=c("indianred3", "darkgoldenrod1", "cyan3", "hotpink3", "olivedrab3", "orangered3"),
+         ylab="Read Depth (DP)", cex=0.6, cex.axis=0.8, ylim=c(0,400))
+## add horizontal lines
+abline(h=10, col="red")
+abline(h=400, col="tomato3")
+abline(h=1000, col="tomato")
+abline(h=2000, col="orange2")
+## with labels
+text(x=0.4, y=10, labels=10, adj=c(0.9,-0.1), col='red', cex=0.6)
+text(x=0.4, y=400, labels=400, adj=c(0.9,-0.1), col='tomato3', cex=0.6)
+text(x=0.4, y=1000, labels=1000, adj=c(0.9,-0.1), col='tomato', cex=0.6)
+text(x=0.4, y=2000, labels=2000, adj=c(0.9,-0.1), col='orange2', cex=0.6)
+dev.off()
+
+## colours: colourful
+"indianred3", "darkgoldenrod1", "cyan3", "hotpink3", "olivedrab3", "orangered3"
+## colours: 2 shades of gray
+"#C0C0C0", "#808080"
+
+
+######## Repeat the same as before for the other vcf files - after filtering
+vcf <- read.vcfR('Tms.fb.bial.vcf')
+dp <- extract.gt(vcf, element = "DP", as.numeric=TRUE)
+pdf(file='Tms.fb.bial.DP.pdf', height = 5, width = 10)
+pdf(file='Tms.fb.bial.DP-lowx.pdf', height = 5, width = 10)
+boxplot(dp, las=3, col=c("indianred3", "darkgoldenrod1", "cyan3", "hotpink3", "olivedrab3", "orangered3"),
+         ylab="Read Depth (DP)", cex=0.6, cex.axis=0.8)
+boxplot(dp, las=3, col=c("indianred3", "darkgoldenrod1", "cyan3", "hotpink3", "olivedrab3", "orangered3"),
+         ylab="Read Depth (DP)", cex=0.6, cex.axis=0.8, ylim=c(0,400))
+## add horizontal lines
+abline(h=10, col="red")
+abline(h=400, col="tomato3")
+abline(h=1000, col="tomato")
+abline(h=2000, col="orange2")
+## with labels
+text(x=0.4, y=10, labels=10, adj=c(0.9,-0.1), col='red', cex=0.6)
+text(x=0.4, y=400, labels=400, adj=c(0.9,-0.1), col='tomato3', cex=0.6)
+text(x=0.4, y=1000, labels=1000, adj=c(0.9,-0.1), col='tomato', cex=0.6)
+text(x=0.4, y=2000, labels=2000, adj=c(0.9,-0.1), col='orange2', cex=0.6)
+dev.off()
+
+
+
+
+
+
+
+
+dp[1:4,1:6]
+
+par(mar=c(12,4,4,2))
+boxplot(dp, col=2:8, las=3)
+title(ylab = "Depth (DP)")
+par(mar=c(5,4,4,2))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
