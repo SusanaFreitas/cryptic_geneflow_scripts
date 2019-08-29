@@ -10,6 +10,7 @@ library(gplots)
 library(ape)
 library(ggmap)
 
+
 #install.packages("StAMPP", dependencies = TRUE)
 #install.packages("gplots", dependencies = TRUE)
 #install.packages("ggmap", dependencies = TRUE)
@@ -21,7 +22,7 @@ library(ggmap)
 #install.packages("lattice", dependencies = TRUE)
 #install.packages("gplots", dependencies = TRUE)
 #install.packages("ape", dependencies = TRUE)
-
+#install.packages("stringi")
 
 #### ADEGENET
 
@@ -80,30 +81,44 @@ title("Principal Coordinate Analysis\n-Tge-")
 
 
 ########################################################################################################################
+### final vcf files
 
+#Tms.fb.bial3.vcf
+#Tms.trim2.bial3.vcf
+Tms.trim3.bial3.vcf # I will use this dataset from now on
 
 ## read vcf file
-vcf3 <- read.vcfR("populations.snps.sed.vcf") #read in all data
-vcf2 <- read.vcfR("corrected_output_allxuniq.vcf") #read in all data
+vcf3 <- read.vcfR("Tms.trim3.bial.vcf") #read in all data
+vcf2 <- read.vcfR("Tms.trim2.bial.vcf") #read in all data
+vcf <- read.vcfR("Tms.fb.bial.vcf") #read in all data
 head(vcf) #check the vcf object
 vcf@fix[1:10,1:5] #check
 
 ## read annotation file
-gff <- read.table("5_Tge_b3v06.max_arth_b2g_droso_b2g.gff", sep="\t", quote="")
+gff <- read.table("3_Tms_b3v08.max_arth_b2g_droso_b2g.gff", sep="\t", quote="")
 
 ## read sequence file (this is very heavy!!)
-dna <- ape::read.dna("5_Tge_b3v08.fasta", format = "fasta")
+dna <- ape::read.dna("3_Tms_b3v08.fasta", format = "fasta")
 
 
 ## plot statistics summed over entire VCF
-chrom <- create.chromR(name='Tge_RAD', vcf=vcf3)
+chrom <- create.chromR(name='Tms_fb', vcf=vcf)
+chrom2 <- create.chromR(name='Tms_t2', vcf=vcf2)
+chrom3 <- create.chromR(name='Tms_t3', vcf=vcf3)
+
 plot(chrom) # plot the data
 
 #quick check read depth distribution per individual
-dp <- extract.gt(vcf3, element='DP', as.numeric=TRUE)
+dp <- extract.gt(vcf, element='DP', as.numeric=TRUE)
+dp2 <- extract.gt(vcf2, element='DP', as.numeric=TRUE)
+dp3 <- extract.gt(vcf3, element='DP', as.numeric=TRUE)
 
 par(mar=c(8,4,1,1))
-boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", las=2, cex=0.4, cex.axis=0.5)
+boxplot(dp3, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", cex=0.4, cex.axis=0.5)
+par(mar=c(8,4,1,1))
+boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", cex=0.4, cex.axis=0.5, ylim=c(0,300))
+abline(h=8, col="red")
+
 
 ###plot read depth distribution per individual
 pdf(file="Tms_readdepth.pdf")
@@ -111,6 +126,159 @@ par(mar=c(8,4,1,1))
 boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", las=2, cex=0.4, cex.axis=0.5, ylim=c(0,50))
 abline(h=8, col="red")
 dev.off()
+
+
+##### convert to genlight
+fbgenli <- vcfR2genlight(vcf, n.cores=1) ## Found 251 loci with more than two alleles.
+t2genli <- vcfR2genlight(vcf2, n.cores=1) ## Found 247 loci with more than two alleles.
+t3genli <- vcfR2genlight(vcf3, n.cores=1) ## Found 208 loci with more than two alleles.
+
+# add real SNP.names
+locNames(fbgenli) <- paste(vcf@fix[,1],vcf@fix[,2],sep="_")
+locNames(t2genli) <- paste(vcf2@fix[,1],vcf2@fix[,2],sep="_")
+locNames(t3genli) <- paste(vcf3@fix[,1],vcf3@fix[,2],sep="_")
+
+# extract pops from indnames
+substrRight <- function(x, n){
+  sapply(x, function(xx)
+         substr(xx, (nchar(xx)-n+1), nchar(xx))
+         )
+}
+# add pop names: here "population" (group) names are last 2 chars of ind name
+pop(fbgenli)<-substrRight(indNames(fbgenli),2)
+pop(t2genli)<-substrRight(indNames(t2genli),2)
+pop(t3genli)<-substrRight(indNames(t3genli),2)
+# check the genlight
+# fbgenli # check the basic info on the genlight object
+# indNames(fbgenli)
+# as.matrix(fbgenli)[1:16,1:10]
+# pop(fbgenli)
+t3genli
+indNames(t3genli)
+as.matrix(t3genli)[1:16,1:10]
+pop(t3genli)
+# check the basic info on the genlight
+# check individual names
+# see tiny bit of the data
+# population assignment
+# look at the total data matrix (0,1,2; white = missing data)
+# glPlot(fbgenli) # takes some time
+glPlot(t3genli) # takes some time
+# N missing SNPs per sample
+x <- summary(t(as.matrix(fbgenli))) # NAs, if present, are in seventh row of summary
+
+mySum <- glSum(fbgenli, alleleAsUnit = TRUE)
+barplot(table(mySum), col="blue", space=0, xlab="Allele counts",
+main="Distribution of ALT allele counts in total dataset")
+
+###plot AFS per one pop
+fbgenli.sep <- seppop(fbgenli, drop=TRUE)
+# separate genlights per population
+fbgenli.sep$P1
+
+# after seppop you must remove the nonvariant positions within the population
+n.alleles.P1 <-colSums(as.matrix(fbgenli.sep$P1))
+# how many alternative alleles are in each locus?
+summary(as.factor(n.alleles.P1))
+# how many particular categories of alternative allele counts are in my pop?
+fbgenli.P1 <- new("genlight", (as.matrix(fbgenli.sep$P1))
+[,(colSums(as.matrix(fbgenli.sep$P1)) > 0) & (colSums(is.na(as.matrix(fbgenli.sep$P1))) == 0)]) # remove the reference-only positions AND remove columns with NA
+fbgenli.P1
+summary(colSums(as.matrix(fbgenli.P1))) # check if there are no zeros
+# plot unfolded AFS - for one pop.
+mySum <- glSum(fbgenli.P1, alleleAsUnit = TRUE)
+barplot(table(mySum), col="blue", space=0, xlab="Allele counts",
+main="Distribution of ALT allele counts in P1")
+# plot the original counts of each category
+
+#### plot AFS for all pops in a batch
+fbgenli.sep <- seppop(fbgenli, drop=TRUE) # separate genlight per population
+# remove the nonvariant positions AND columns with NA within that pop.
+fbgenli.sep.2 <- lapply (fbgenli.sep, function (pop) {new("genlight", (as.matrix(pop))[,(colSums(as.matrix(pop)) > 0)
+& (colSums(is.na(as.matrix(pop))) == 0)])})
+##add pop identity to list elements
+listnames<-names(fbgenli.sep.2)
+for (i in seq(listnames)) {pop(fbgenli.sep.2[[i]])<-
+substrRight(indNames(fbgenli.sep.2[[i]]),2)}
+# loop over each population in a list of populations and draw AFS into one fig
+pdf("AFS_Tms_barplot_fb.pdf", width=5, height=5)
+par(mfrow=c(2,3),mar=c(2,2,2,0))
+mySum <- lapply (fbgenli.sep.2, function (pop) {
+barplot(table(glSum(pop, alleleAsUnit=T)), col="blue", space=0,
+xlab="Allele counts",
+main=paste(levels(pop(pop)),sum(table(glSum(pop, alleleAsUnit=T))),"SNPs",
+sep=" "))
+})
+dev.off()
+par(mfrow=c(1,1))
+
+##### fb file
+### Calculate Nei's distances between individuals/pops
+fb.D.ind <- stamppNeisD(fbgenli, pop = FALSE) # Nei's 1972 distance between indivs
+stamppPhylip(fb.D.ind , file="fb.indiv_Neis_distance.phy.dst") # export matrix - for SplitsTree
+fb.D.pop <- stamppNeisD(fbgenli, pop = TRUE)
+# Nei's 1972 distance between pops
+stamppPhylip(fb.D.pop, file="fb.pops_Neis_distance.phy.dst") # export matrix - for SplitsTree
+### Calculate pairwise Fst among populations
+fbgenli@ploidy <- as.integer(ploidy(fbgenli))
+fb.fst<-stamppFst(fbgenli, nboots = 1, percent =95, nclusters=4)
+#modify the matrix for opening in SplitsTree
+fb.fst.sym <- fb.fst
+fb.fst.sym[upper.tri(fb.fst.sym)] <- t(fb.fst.sym)[upper.tri(fb.fst.sym)]
+# add upper triangle
+fb.fst.sym[is.na(fb.fst.sym)] <- 0
+#replace NAs with zero
+stamppPhylip(fb.fst.sym, file="ALL_fb.pops_pairwise_Fst.phy.dst")
+# export matrix - for SplitsTree
+
+colnames(fb.D.ind) <- rownames(fb.D.ind)
+pdf(file="Neis_dist_heatmap_fb.pdf", width=10, height=10)
+heatmap.2(fb.D.ind, trace="none", cexRow=0.4, cexCol=0.4)
+dev.off()
+
+
+# plot and save NJ tree
+library(ape)
+tre <-nj(fb.D.ind)
+pdf(file="Neis_dist_tree_fb.pdf", width=10, height=10)
+plot(tre, type="unrooted", edge.w=2, font =1)
+dev.off()
+plot(nj(fb.D.ind))
+write.tree(nj(fb.D.ind),file="NJ.Neis.dist.tree-fb.tre")
+
+#### trim3 file
+### Calculate Nei's distances between individuals/pops
+t3.D.ind <- stamppNeisD(t3genli, pop = FALSE) # Nei's 1972 distance between indivs
+stamppPhylip(t3.D.ind , file="t3.indiv_Neis_distance.phy.dst") # export matrix - for SplitsTree
+t3.D.pop <- stamppNeisD(t3genli, pop = TRUE)
+# Nei's 1972 distance between pops
+stamppPhylip(t3.D.pop, file="t3.pops_Neis_distance.phy.dst") # export matrix - for SplitsTree
+### Calculate pairwise Fst among populations
+t3genli@ploidy <- as.integer(ploidy(t3genli))
+t3.fst<-stamppFst(t3genli, nboots = 1, percent =95, nclusters=4)
+#modify the matrix for opening in SplitsTree
+t3.fst.sym <- t3.fst
+t3.fst.sym[upper.tri(t3.fst.sym)] <- t(t3.fst.sym)[upper.tri(t3.fst.sym)]
+# add upper triangle
+t3.fst.sym[is.na(t3.fst.sym)] <- 0
+#replace NAs with zero
+stamppPhylip(t3.fst.sym, file="ALL_t3.pops_pairwise_Fst.phy.dst")
+# export matrix - for SplitsTree
+
+colnames(t3.D.ind) <- rownames(t3.D.ind)
+pdf(file="Neis_dist_heatmap_t3.pdf", width=10, height=10)
+heatmap.2(t3.D.ind, trace="none", cexRow=0.4, cexCol=0.4)
+dev.off()
+
+
+# plot and save NJ tree
+library(ape)
+tre <-nj(t3.D.ind)
+pdf(file="Neis_dist_tree_t3.pdf", width=10, height=10)
+plot(tre, type="unrooted", edge.w=2, font =1)
+dev.off()
+plot(nj(t3.D.ind))
+write.tree(nj(fb.D.ind),file="NJ.Neis.dist.tree-t3.tre")
 
 
 ### plot FST pop1 - pop2
