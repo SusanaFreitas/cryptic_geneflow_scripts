@@ -9,4 +9,4 @@ read.vcfR("populations.snps.vcf", limit = 1e+07, nrows = -1, skip = 0, cols = NU
   Tms 4320
   
   
-  bcftools view -H cichlid.vcf | wc -l
+
