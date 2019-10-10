@@ -165,7 +165,17 @@ GenomeAnalysisTK VariantFiltration \
  -V Tms.trim2.fb.vcf \
  --genotype-filter-expression 'DP<8||DP>200' \
  --genotype-filter-name 'DP_8-200' \
+ --set-filtered-genotype-to-no-call\
  --output Tms.trim2.fb_DPfilter.vcf
+
+## OPTIONS:
+## --set-filtered-genotype-to-no-call : used this to set the filtered genotypes (the ones that less than 8 > DP > 200)
+## to ./.
+## https://gatkforums.broadinstitute.org/gatk/discussion/7577/removing-variants-based-on-the-format-field
+
+## I had a problem with this script and I was getting constant 'invalid argument' errors.
+## I solved it by removing all spaces in between the formal arguments...
+# http://selectvariants1.rssing.com/chan-9504484/all_p2.html
 
 
 ######################################################################
@@ -213,6 +223,10 @@ vcflib vcfallelicprimitives -kg Tge.trim2-test.py.out.vcf > Tge.trim2-test_posvc
 vcflib vcfallelicprimitives -kg Tge.trim2.py.out.vcf > Tge.trim2_posvcflib.vcf
 vcflib vcfallelicprimitives -kg Tge.trim3.py.out.vcf > Tge.trim3_posvcflib.vcf
 
+vcflib vcfallelicprimitives -kg Tms.fb.QUALpy.vcf > Tms.fb_posvcflib.vcf
+vcflib vcfallelicprimitives -kg Tms.trim2.QUALpy.vcf > Tms.trim2_posvcflib.vcf
+vcflib vcfallelicprimitives -kg Tms.trim3.QUALpy.vcf > Tms.trim3_posvcflib.vcf
+
 ######################################################################
 ##################### Filter by missing data #########################
 ######################################################################
@@ -243,7 +257,22 @@ grep -v 'TYPE=del' Tms.trim2.bial2.vcf > Tms.trim2.bial3.vcf
 
 grep -v 'TYPE=snp,' Tms.trim3missfilt.recode.vcf > Tms.trim3.bial.vcf
 grep -v 'TYPE=ins' Tms.trim3.bial.vcf > Tms.trim3.bial2.vcf 
-grep -v 'TYPE=del' Tms.trim3.bial2.vcf > Tms.trim3.bial3.vcf 
+grep -v 'TYPE=del' Tms.trim3.bial2.vcf > Tms.trim3.bial3.vcf
+
+
+          #######################################################
+####### ~~~~~~~~~~ end of mapping - SNPs calling pipeline ~~~~~~~~~ ########
+          #######################################################
+
+
+
+
+
+
+
+
+
+
 
 ######################################################################
 ########### Calculate intersection between stacks and FB #############
@@ -359,6 +388,8 @@ plink --vcf Tms.scaf.vcf --out Tms.scaf --make-bed --allow-extra-chr --recode
 # --recode is to make a .map file
 # --allow-extra-chr is to allow weird CHROM names
 # this command will produce 8 files (.map, .nosex, .bed, .bim, .fam, .ped, .log)
+
+
 
 ######################################################################
 ####################### Calculate LD decay ###########################
@@ -620,6 +651,63 @@ print(mean_se_violin)
 dev.off()
 
 
+
+
+#########################################
+############# calculate HET #############
+#########################################
+
+## To get all the observed hom and het positions (HOM1 and HOM2)
+vcftools --vcf Tms.trim3.scafs.vcf --hardy --out Tms.trim3
+vcftools --vcf Tms.trim2.scafs.vcf --hardy --out Tms.trim2
+vcftools --vcf Tms.fb.scafs.vcf --hardy --out Tms.fb
+## To get the total heterozygosity per individual 
+vcftools --vcf Tms.trim3.scafs.vcf --het --out Tms.trim3
+vcftools --vcf Tms.trim2.scafs.vcf --het --out Tms.trim2
+vcftools --vcf Tms.fb.scafs.vcf --het --out Tms.fb
+
+## options:
+# 'with-freqs' adds MAF columns to table-formatted reports.
+
+### this command will calculate an approximate of the het/total positions ratio
+## excluding the reference homozygous positions > 0/0 and 0|0
+vcflib vcfhethomratio file.vcf
+
+## I can also calculate the same ratio, the values are not exactly the same (??) but approximate
+## I will use the manual calculated ratio (because I cannot explain what happens in vcflib
+## and why is it different than my manually calculated ratio)
+
+### calculate heterozygosity - counts of het positions in the vcf files
+for i in {10..32}; do grep -v '^#' asex3.vcf | awk -v i="$i" '{ print $i}' | grep '1/0' | wc -l; done
+for i in {10..32}; do grep -v '^#' asex3.vcf | awk -v i="$i" '{ print $i}' | grep '0/1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.fb.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1/0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.fb.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0/1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.fb.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1|0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.fb.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0|1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim2.scafs.vcf| awk -v i="$i" '{ print $i}' | grep '1/0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim2.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0/1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim2.scafs.vcf| awk -v i="$i" '{ print $i}' | grep '1|0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim2.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0|1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim3.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1/0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim3.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0/1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim3.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1|0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim3.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0|1' | wc -l; done
+
+### calculate homozygosity - counts of hom positions in the vcf files
+for i in {10..55}; do grep -v '^#' Tms.fb.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1/1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.fb.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0/0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.fb.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1|1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.fb.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0|0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim2.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1/1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim2.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0/0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim2.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1|1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim2.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0|0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim3.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1/1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim3.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0/0' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim3.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '1|1' | wc -l; done
+for i in {10..55}; do grep -v '^#' Tms.trim3.scafs.vcf | awk -v i="$i" '{ print $i}' | grep '0|0' | wc -l; done
+
+
 ######################################################################
 #################### Simulate Asexual Genomes ########################
 ######################################################################
@@ -707,17 +795,6 @@ initialize() {
  (((((((( CONTINUE HERE )))))))))
  (((((((( 10 Setembro 2019 ))))))))
  (((((((((((( )))))))))))
-
-
-#########################################
-############# calculate HET #############
-#########################################
-
-vcftools --vcf input.vcf --het --out output.het
-
-
-## options:
-# 'with-freqs' adds MAF columns to table-formatted reports.
 
 
 

@@ -1,5 +1,6 @@
 #!/bin/sh
-### script to 
+### script to filter by genotype DP (read depth)
+## Exclude all genotypes bellow 8 reads and above 200 reads coverage
 
 ## I had a problem with this script and I was getting constant 'invalid argument' errors.
 ## I solved it by removing all spaces in between the formal arguments...

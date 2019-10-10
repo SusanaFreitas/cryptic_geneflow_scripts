@@ -23,6 +23,4 @@ for record in vcf_reader:
 #	print record.INFO['PAIRED']
 
 
-Tms.alprim.vcf
-Tms.trim2.alprim.vcf
-Tms.trim3.alprim.vcf
+
