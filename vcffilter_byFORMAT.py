@@ -254,9 +254,9 @@ for variant in vcf_data:
 	#cleanline = ", ".join(str(line))
 	myfile.write(str(cleanline) + '\n')
 myfile.close()
-print(myfile)	
-		allArrays = list(zip(allArrays, line))
-#	myfile.write(line + '\n')
+# print(myfile)	
+# 		allArrays = list(zip(allArrays, line))
+# #	myfile.write(line + '\n')
 
 
 
