@@ -498,7 +498,615 @@ for (line in nrow(AO)) {
 
 
 
+######################################################################################
+########################### plot heterozygosities ####################################
+######################################################################################
 
+setwd("C:/Users/User/Dropbox/Timema_cryptic_geneflow/mapping_scaf_coordinates_new/test_plink/allinds/heterozygosity")
+
+ls()
+
+
+colnames(lg1) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", "hom11", "hom00", 
+  "het11", "het00",	"sum(hom)",	"sum(homnonref)",	"het/hom", "het/homnonref", "Vcflib-hethomration", "het/(het+hom)",
+    "het/(het+homnonref)", "hom/(hom+het)", "homnonref/(homnonref+het)", "sampleno", "POP")
+
+
+#### Tge ####
+lg1 <- read.csv2(file = "Tms_lg1_coord.csv", header=T, sep='\t')
+lg2 <- read.csv2(file = "Tms_lg2_coord.csv", header=T, sep='\t')
+lg3 <- read.csv2(file = "Tms_lg3_coord.csv", header=T, sep='\t')
+lg4 <- read.csv2(file = "Tms_lg4_coord.csv", header=T, sep='\t')
+lg5 <- read.csv2(file = "Tms_lg5_coord.csv", header=T, sep='\t')
+lg6 <- read.csv2(file = "Tms_lg6_coord.csv", header=T, sep='\t')
+lg7 <- read.csv2(file = "Tms_lg7_coord.csv", header=T, sep='\t')
+lg8 <- read.csv2(file = "Tms_lg8_coord.csv", header=T, sep='\t')
+lg9 <- read.csv2(file = "Tms_lg9_coord.csv", header=T, sep='\t')
+lg10 <- read.csv2(file = "Tms_lg10_coord.csv", header=T, sep='\t')
+lg11 <- read.csv2(file = "Tms_lg11_coord.csv", header=T, sep='\t')
+lg12 <- read.csv2(file = "Tms_lg12_coord.csv", header=T, sep='\t')
+lgX <- read.csv2(file = "Tms_lgX_coord.csv", header=T, sep='\t')
+
+
+### change colnames to something readable and writeable
+colnames(lg1) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+
+
+colnames(lg2) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg3) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg4) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg5) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg6) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg7) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg8) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg9) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+
+colnames(lg10) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                    "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                    "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                    "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg11) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                    "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                    "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                    "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lg12) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                    "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                    "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                    "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+colnames(lgX) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
+                   "hom11", "hom00", "het11", "het00",	"sumhom",	"sumhomnonref",	"het_hom",
+                   "het_homnonref", "Vcflib-hethomration", "het_hethom", "het_hethomnonref",
+                   "hom_homhet", "homnonref_homnonrefhet", "sampleno", "POP")
+
+
+## add new column with lg no
+lg1$lg <- rep("lg1",times = 46)
+lg2$lg <- rep("lg2",times = 46)
+lg3$lg <- rep("lg3",times = 46)
+lg4$lg <- rep("lg4",times = 46)
+lg5$lg <- rep("lg5",times = 46)
+lg6$lg <- rep("lg6",times = 46)
+lg7$lg <- rep("lg7",times = 46)
+lg8$lg <- rep("lg8",times = 46)
+lg9$lg <- rep("lg9",times = 46)
+lg10$lg <- rep("lg10",times = 46)
+lg11$lg <- rep("lg11",times = 46)
+lg12$lg <- rep("lg12",times = 46)
+lgX$lg <- rep("lgX",times = 46)
+
+### concatenate all veritcally
+Tgecat <- do.call("rbind", list(lg1, lg2, lg3, lg4, lg5, lg6, lg7, lg8, lg9, lg10, lg11, lg12, lgX))
+
+## plot by indv order
+Tgecat$sampleno <- factor(Tgecat$sampleno, levels = c("Gepop1.1", "Gepop1.2", "Gepop1.3", "Gepop1.4",
+                                                  "Gepop1.5", "Gepop1.6", "Gepop1.7", "Gepop1.8" ,
+                                                   "Gepop1.9", "Gepop1.10", "Gepop1.11", "Gepop1.12",
+                                                 "Gepop1.13", "Gepop1.14", "Gepop1.15", "Gepop1.16",
+                                                  "Gepop1.17", "Gepop1.18", "Gepop1.19", "Gepop1.20",
+                                                  "Gepop1.21", "Gepop1.22", "Gepop1.23"))
+Tgecat$sampleno <- factor(Tgecat$sampleno, levels = c("1", "2", "3", "4", "5", "6", "7", 
+                                                      "8", "9", "10", "11", "12", "13", "14", "15", 
+                                                      "16", "17", "18", "19", "20", "21", "22", "23"))
+## convert several columns as numeric
+cols = c(2:5, 7:15, 17:20);    
+Tgecat[,cols] = apply(Tgecat[,cols], 2, function(x) as.numeric(as.character(x)))
+
+
+
+library(ggplot2)
+#install.packages("ggplot2")
+pdf(file="het-all-DPcorrected.pdf", width=10)
+ggplot(data = Tgecat, mapping = aes(x = lg, y = Tgecat$het_hethom, colour = POP)) +
+  geom_point() +
+#  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
+dev.off()
+
+ggplot(data = Tgecat, mapping = aes(x = lg, y = het_hethom, colour=POP)) +
+  geom_boxplot() +
+  #  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
+
+pdf(file="Tge_ratio_het_all.pdf", width=10)
+ggplot(data = Tgecat, mapping = aes(x = lg, y = het_hethom, colour=POP)) +
+  geom_boxplot() +
+  #  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8)) +
+  ylim(0, 0.05)
+dev.off()
+
+
+
+ggplot(data = Tgecat, mapping = aes(x = lg, y = hom_homhet, colour=POP)) +
+  geom_boxplot() +
+  #  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8)) +
+  ylim(0.9, 1.0)
+
+
+#######################################################
+################ ANALYSE LD RESULTS ###################
+#######################################################
+
+
+LD <- read.delim(file = "test.geno.ld", header = TRUE)
+ggplot(LD, aes(x = ((LD$POS2 + LD$POS1)/2), y = LD$R^2)) + geom_point()
+
+##### in bash
+
+
+# working file: Tge_alignedcoords_P1.maf.inter.ld
+sed -i 's/ /+/g' Tge_alignedcoords_P2.maf.inter.ld
+# remove the last character
+sed -i 's/.$//' Tge_alignedcoords_P2.maf.inter.ld
+
+sed -i 's/+++++++++++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++++++++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld 
+sed -i 's/+++++++++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld 
+sed -i 's/++++++++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+
+sed -i 's/+++++++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/+++++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/+++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+
+sed -i 's/+++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/+++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/++/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+sed -i 's/+/\t/g' Tge_alignedcoords_P2.maf.inter.ld
+
+# some '.' were left without tabs between them and the next column. To correct that:
+sed -i 's/\.l/\.\tl/g' Tge_alignedcoords_P2.maf.inter.ld
+
+# remove \t in the beginning of the line
+sed -i 's/^\t//g' Tge_alignedcoords_P2.maf.inter.ld
+
+
+
+
+# make violin plot
+#install.packages("ggplot2", lib="/users/sfreitas1/R")
+#install.packages("crayon", lib="/users/sfreitas1/R")
+#install.packages("vctrs", lib="/users/sfreitas1/R")
+#install.packages("backports", lib="/users/sfreitas1/R")
+#install.packages("withr", lib="/users/sfreitas1/R")
+#install.packages("labeling", lib="/users/sfreitas1/R")
+#install.packages("digest", lib="/users/sfreitas1/R")
+#install.packages("dplyr", lib="/users/sfreitas1/R")
+#install.packages("fansi", lib="/users/sfreitas1/R")
+#install.packages("utf8", lib="/users/sfreitas1/R")
+#install.packages("cli", lib="/users/sfreitas1/R")
+
+## to be used in wally
+#library("cli", lib.loc="/users/sfreitas1/R")
+#library("utf8", lib.loc="/users/sfreitas1/R")
+#library("fansi", lib.loc="/users/sfreitas1/R")
+#library("digest", lib.loc="/users/sfreitas1/R")
+#library("labeling", lib.loc="/users/sfreitas1/R")
+#library("withr", lib.loc="/users/sfreitas1/R")
+#library("backports", lib.loc="/users/sfreitas1/R")
+#library("vctrs", lib.loc="/users/sfreitas1/R")
+#library("crayon", lib.loc="/users/sfreitas1/R")
+#library("ggplot2", lib.loc="/users/sfreitas1/R")
+#library("dplyr", lib.loc="/users/sfreitas1/R")
+
+library("cli")
+library("utf8")
+library("fansi")
+library("digest")
+library("labeling")
+library("withr")
+library("backports")
+library("vctrs")
+library("crayon")
+library("ggplot2")
+library("dplyr")
+
+
+# read in the readable file (after sed/bash tweaking)
+p1in <- read.delim("Tge_alignedcoords_P1.maf.inter.ld", header=T)
+p2in <- read.delim("Tge_alignedcoords_P2.maf.inter.ld", header=T)
+p1in <- read.delim("Tms_alignedcoords_P1.maf.inter.ld", header=T)
+p2in <- read.delim("Tms_alignedcoords_P2.maf.inter.ld", header=T)
+# changing the collumns names
+colnames(p2in) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
+
+
+# make column with chr-chr
+p1in$inter <- paste(p1in$CHR_A,'-',p1in$CHR_B, sep='')
+p2in$inter <- paste(p2in$CHR_A,'-',p2in$CHR_B, sep='')
+# confirm if we are doing it correctly
+chr_unq <- unique(p1in$inter)
+length(chr_unq)
+# 91 
+### GOOD!! continue :)
+
+# to make subset of data (example)
+lg1 <- subset(p1in, CHR_A %in% c("lg1"))
+lg1_P2 <- subset(p2in, CHR_A %in% c("lg1"))
+## how many cr interactions we have
+"lg1-lg1", "lg1-lg2", "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6",
+"lg1-lg7", "lg1-lg8", "lg1-lg9", "lg1-lg10", "lg1-lg11", "lg1-lg12", "lg1-lgX"
+
+## example of the violin plot
+pdf(file="lg1-all.pdf")
+myplot <- ggplot(lg1) + 
+	geom_violin(aes(x= inter, y = R2, colour=inter)) +
+	facet_wrap(~inter, scales = "free")
+myplot <- ggplot(lg1_P2) + 
+	geom_violin(aes(x= inter, y = R2, colour=inter)) +
+	facet_wrap(~inter, scales = "free")
+print(myplot)
+dev.off()
+
+## reorder x axis labels
+p1in$inter2 <- factor(p1in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
+				"lg9-lg9", "lg10-lg10", "lg11-lg11", "lg12-lg12", "lgX-lgX",
+				"lg1-lg2", "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6", "lg1-lg7", "lg1-lg8", "lg1-lg9",
+				"lg1-lg10", "lg1-lg11", "lg1-lg12", "lg1-lgX",
+				"lg2-lg3", "lg2-lg4", "lg2-lg5", "lg2-lg6", "lg2-lg7", "lg2-lg8", "lg2-lg9", "lg10-lg2",
+				"lg11-lg2", "lg12-lg2", "lg2-lgX",
+				"lg3-lg4", "lg3-lg5", "lg3-lg6", "lg3-lg7", "lg3-lg8", "lg3-lg9", "lg10-lg3", "lg11-lg3",
+				"lg12-lg3", "lg3-lgX",
+				"lg4-lg5", "lg4-lg6", "lg4-lg7", "lg4-lg8", "lg4-lg9", "lg10-lg4", "lg11-lg4", "lg12-lg4",
+				"lg4-lgX",
+				"lg5-lg6", "lg5-lg7", "lg5-lg8", "lg5-lg9", "lg10-lg5", "lg11-lg5", "lg12-lg5", "lg5-lgX",
+				"lg6-lg7", "lg6-lg8", "lg6-lg9", "lg10-lg6", "lg11-lg6", "lg12-lg6", "lg6-lgX",
+				"lg7-lg8", "lg7-lg9", "lg10-lg7", "lg11-lg7", "lg12-lg7", "lg7-lgX",
+				"lg8-lg9", "lg10-lg8", "lg11-lg8", "lg12-lg8", "lg8-lgX",
+				"lg10-lg9", "lg11-lg9", "lg12-lg9", "lg9-lgX",
+				"lg10-lg11", "lg10-lg12", "lg10-lgX",
+				"lg11-lg12", "lg11-lgX",
+				"lg12-lgX"))
+p2in$inter2 <- factor(p2in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
+				"lg9-lg9", "lg10-lg10", "lg11-lg11", "lg12-lg12", "lgX-lgX",
+				"lg1-lg2", "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6", "lg1-lg7", "lg1-lg8", "lg1-lg9",
+				"lg1-lg10", "lg1-lg11", "lg1-lg12", "lg1-lgX",
+				"lg2-lg3", "lg2-lg4", "lg2-lg5", "lg2-lg6", "lg2-lg7", "lg2-lg8", "lg2-lg9", "lg10-lg2",
+				"lg11-lg2", "lg12-lg2", "lg2-lgX",
+				"lg3-lg4", "lg3-lg5", "lg3-lg6", "lg3-lg7", "lg3-lg8", "lg3-lg9", "lg10-lg3", "lg11-lg3",
+				"lg12-lg3", "lg3-lgX",
+				"lg4-lg5", "lg4-lg6", "lg4-lg7", "lg4-lg8", "lg4-lg9", "lg10-lg4", "lg11-lg4", "lg12-lg4",
+				"lg4-lgX",
+				"lg5-lg6", "lg5-lg7", "lg5-lg8", "lg5-lg9", "lg10-lg5", "lg11-lg5", "lg12-lg5", "lg5-lgX",
+				"lg6-lg7", "lg6-lg8", "lg6-lg9", "lg10-lg6", "lg11-lg6", "lg12-lg6", "lg6-lgX",
+				"lg7-lg8", "lg7-lg9", "lg10-lg7", "lg11-lg7", "lg12-lg7", "lg7-lgX",
+				"lg8-lg9", "lg10-lg8", "lg11-lg8", "lg12-lg8", "lg8-lgX",
+				"lg10-lg9", "lg11-lg9", "lg12-lg9", "lg9-lgX",
+				"lg10-lg11", "lg10-lg12", "lg10-lgX",
+				"lg11-lg12", "lg11-lgX",
+				"lg12-lgX"))
+
+# eliminate all values of R^2 > 0.9
+#sub_p1in <- p1in[!(p1in$R2>=1),]
+#sub_p2in <- p1in[!(p2in$R2>=1),]
+
+# make error bars
+errbar_lims = group_by(p1in, inter2) %>%
+summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
+upper=mean+(2*se), lower=mean-(2*se))
+
+errbar_lims = group_by(p2in, inter2) %>%
+summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
+upper=mean+(2*se), lower=mean-(2*se))
+
+
+##### final commands to make the main plot: all pairwise comparisons
+mean_se_violin =  ggplot() + 
+	geom_violin(data=p1in, aes(x= inter2, y = R2, colour=inter2)) +
+	geom_point(data=p1in, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
+	geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
+	theme_minimal() +
+	theme(axis.text.x = element_text(angle = 45, size=4,  hjust=1), legend.position = "none")
+
+mean_se_violin =  ggplot() + 
+	geom_violin(data=p2in, aes(x= inter2, y = R2, colour=inter2)) +
+	geom_point(data=p2in, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
+	geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
+	theme_minimal() +
+	theme(axis.text.x = element_text(angle = 45, size=4,  hjust=1), legend.position = "none")
+	
+	
+pdf(file="Tge_P2.ld_coords.pdf")
+print(mean_se_violin)
+dev.off()
+
+
+### calculate LD decay 
+ggplot(p1in, aes(dist, r2)) +
+	geom_point() +
+		geom_smooth(formula=dist ~ r2, se=F)
+
+
+# read in the readable file (after sed/bash tweaking)
+p1dec <- read.delim("Tge.P1.coord.decay.ld", header=T)
+p2dec <- read.delim("Tge.P2.coord.decay.ld", header=T)
+
+p1dec <- read.delim("Tms.P1.coord.decay.ld", header=T)
+p2dec <- read.delim("Tms.P2.coord.decay.ld", header=T)
+
+
+
+## convert several columns as numeric
+cols = c(2, 5, 7);    
+p1dec[,cols] = apply(p1dec[,cols], 2, function(x) as.numeric(as.character(x)))
+p2dec[,cols] = apply(p2dec[,cols], 2, function(x) as.numeric(as.character(x)))
+
+# make new column : distance between SNPs
+p1dec$distance <- p1dec$BP_B - p1dec$BP_A
+p2dec$distance <- p2dec$BP_B - p2dec$BP_A
+
+## plot
+install.packages("gridExtra")
+library("gridExtra")
+
+sub1 <- p1dec[(p1dec$CHR_A=="lg1"),]
+plot1<-ggplot(sub1, aes(distance, R2)) +
+  geom_point() +
+#  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg1")+
+  theme(axis.text = element_text(size=6))
+
+sub2 <- p1dec[(p1dec$CHR_A=="lg2"),]
+plot2<-ggplot(sub2, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg2")+
+  theme(axis.text = element_text(size=6))
+
+sub3 <- p1dec[(p1dec$CHR_A=="lg3"),]
+plot3<-ggplot(sub3, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg3")+
+  theme(axis.text = element_text(size=6))
+
+sub4 <- p1dec[(p1dec$CHR_A=="lg4"),]
+plot4<-ggplot(sub4, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg4")+
+  theme(axis.text = element_text(size=6))
+
+sub5 <- p1dec[(p1dec$CHR_A=="lg5"),]
+plot5<-ggplot(sub5, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg5")+
+  theme(axis.text = element_text(size=6))
+
+sub6 <- p1dec[(p1dec$CHR_A=="lg6"),]
+plot6<-ggplot(sub6, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg6")+
+  theme(axis.text = element_text(size=6))
+
+sub7 <- p1dec[(p1dec$CHR_A=="lg7"),]
+plot7<-ggplot(sub7, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg7")+
+  theme(axis.text = element_text(size=6))
+
+sub8 <- p1dec[(p1dec$CHR_A=="lg8"),]
+plot8<-ggplot(sub8, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg8")+
+  theme(axis.text = element_text(size=6))
+
+sub9 <- p1dec[(p1dec$CHR_A=="lg9"),]
+plot9<-ggplot(sub9, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg9")+
+  theme(axis.text = element_text(size=6))
+
+sub10 <- p1dec[(p1dec$CHR_A=="lg10"),]
+plot10<-ggplot(sub10, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg10")+
+  theme(axis.text = element_text(size=6))
+
+sub11 <- p1dec[(p1dec$CHR_A=="lg11"),]
+plot11<-ggplot(sub11, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg11")+
+  theme(axis.text = element_text(size=6))
+
+sub12 <- p1dec[(p1dec$CHR_A=="lg12"),]
+plot12<-ggplot(sub12, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lg12")+
+  theme(axis.text = element_text(size=6))
+
+subX <- p1dec[(p1dec$CHR_A=="lgX"),]
+plotX<-ggplot(subX, aes(distance, R2)) +
+  geom_point() +
+  #  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)  +
+  ggtitle("lgX") +
+  theme(axis.text = element_text(size=6))
+
+pdf("Tge_P1_LDdecay.pdf", width = 10, paper = 'a4')
+grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8,
+             plot9, plot10, plot11, plot12, plotX, ncol=4)
+
+dev.off()
+ggplot(p2dec, aes(distance, R2)) +
+  geom_point() +
+  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)
+
+subs <- p2dec[(p2dec$CHR_A=="lg8"),]
+subs <- p1dec[(p1dec$CHR_A=="lg4"),]
+ggplot(subs, aes(distance, R2)) +
+  geom_point() +
+  facet_grid(CHR_A ~ .) +
+  geom_smooth(formula=distance ~ R2, se=F)
+
+
+
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# working file: Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/ /+/g' Tms_alignedcoords_P2.maf.inter.ld
+# remove the last character
+sed -i 's/.$//' Tms_alignedcoords_P2.maf.inter.ld
+
+sed -i 's/+++++++++++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++++++++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld 
+sed -i 's/+++++++++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld 
+sed -i 's/++++++++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+
+sed -i 's/+++++++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/+++++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/+++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+
+sed -i 's/+++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/++++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/+++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/++/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+sed -i 's/+/\t/g' Tms_alignedcoords_P2.maf.inter.ld
+
+# some '.' were left without tabs between them and the next column. To correct that:
+sed -i 's/\.l/\.\tl/g' Tms_alignedcoords_P2.maf.inter.ld
+
+# remove \t in the beginning of the line
+sed -i 's/^\t//g' Tms_alignedcoords_P2.maf.inter.ld
+
+
+
+
+
+# working file: Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/ /+/g' Tms_alignedcoords_P1.maf.inter.ld
+# remove the last character
+sed -i 's/.$//' Tms_alignedcoords_P1.maf.inter.ld
+
+sed -i 's/+++++++++++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/++++++++++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld 
+sed -i 's/+++++++++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld 
+sed -i 's/++++++++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+
+sed -i 's/+++++++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/++++++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/+++++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/++++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/+++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/++++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+
+sed -i 's/+++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/++++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/+++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/++/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+sed -i 's/+/\t/g' Tms_alignedcoords_P1.maf.inter.ld
+
+# some '.' were left without tabs between them and the next column. To correct that:
+sed -i 's/\.l/\.\tl/g' Tms_alignedcoords_P1.maf.inter.ld
+
+# remove \t in the beginning of the line
+sed -i 's/^\t//g' Tms_alignedcoords_P1.maf.inter.ld
+
+
+
+
+
+# make het plots per individual
+hetfb <- read.csv2(file = "Tms.fb.het", header=T, sep='\t')
+het2 <- read.csv2(file = "Tms.trim2.het", header=T, sep='\t')
+het3 <- read.csv2(file = "Tms.trim3.het", header=T, sep='\t')
+
+colnames(hetfb) <- c("INDV", "O.HOM", "E.HOM", "N_SITES", "F", "indvno", "POP")
+colnames(het2) <- c("INDV", "O.HOM", "E.HOM", "N_SITES", "F", "indvno", "POP")
+colnames(het3) <- c("INDV", "O.HOM", "E.HOM", "N_SITES", "F", "indvno", "POP")
+hetfb$ratio <- hetfb$O.HOM/hetfb$N_SITES
+het2$ratio <- het2$O.HOM/het2$N_SITES
+het3$ratio <- het3$O.HOM/het3$N_SITES
+
+
+## plot by indv order
+hetfb$INDV <- factor(hetfb$INDV, levels = hetfb$INDV)
+het2$INDV <- factor(het2$INDV, levels = het2$INDV)
+het3$INDV <- factor(het3$INDV, levels = het3$INDV)
 
 
 
