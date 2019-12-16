@@ -654,8 +654,10 @@ ggplot(data = Tgecat, mapping = aes(x = lg, y = hom_homhet, colour=POP)) +
 #######################################################
 ################ ANALYSE LD RESULTS ###################
 #######################################################
+setwd("C:/Users/User/Dropbox/Timema_cryptic_geneflow/mapping_scaf_coordinates_new/test_plink/allinds/heterozygosity")
+setwd("C:/Users/User/Dropbox/Timema_cryptic_geneflow/simulations/files_plot_R")
 
-
+ls()
 LD <- read.delim(file = "test.geno.ld", header = TRUE)
 ggplot(LD, aes(x = ((LD$POS2 + LD$POS1)/2), y = LD$R^2)) + geom_point()
 
@@ -734,17 +736,56 @@ library("dplyr")
 
 
 # read in the readable file (after sed/bash tweaking)
+# asex pops
 p1in <- read.delim("Tge_alignedcoords_P1.maf.inter.ld", header=T)
 p2in <- read.delim("Tge_alignedcoords_P2.maf.inter.ld", header=T)
 p1in <- read.delim("Tms_alignedcoords_P1.maf.inter.ld", header=T)
 p2in <- read.delim("Tms_alignedcoords_P2.maf.inter.ld", header=T)
 # changing the collumns names
+colnames(p1in) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 colnames(p2in) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
+
+
+# sex pop
+tce <- read.delim("Tce_alignedcoords.lg.maf.inter.ld", header=T)
+colnames(tce) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
+
+
+
+# simulations
+# cloning - no recombination
+clono <- read.delim("cloning-norecomb.lg.maf.inter.ld")
+colnames(clono) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
+# cloning - low recombination
+clolo <- read.delim("cloning-lowrecomb.lg.maf.inter.ld")
+colnames(clolo) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
+# cloning - high recombination
+clohi <- read.delim("cloning-highrecomb.lg.maf.inter.ld")
+colnames(clohi) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
+
+# selfing - no recombination
+selno <- read.delim("selfing-norecomb.lg.maf.inter.ld")
+# selfing - low recombination
+sellow <- read.delim("selfing-lowrecomb.lg.maf.inter.ld")
+# selfing - high recombination
+selhi <- read.delim("selfing-highrecomb.lg.maf.inter.ld")
 
 
 # make column with chr-chr
 p1in$inter <- paste(p1in$CHR_A,'-',p1in$CHR_B, sep='')
 p2in$inter <- paste(p2in$CHR_A,'-',p2in$CHR_B, sep='')
+
+clono$inter <- paste(clono$CHR_A,'-',clono$CHR_B, sep='')
+clolo$inter <- paste(clolo$CHR_A,'-',clolo$CHR_B, sep='')
+clohi$inter <- paste(clohi$CHR_A,'-',clohi$CHR_B, sep='')
+
+selno$inter <- paste(selno$CHR_A,'-',selno$CHR_B, sep='')
+sello$inter <- paste(sello$CHR_A,'-',sello$CHR_B, sep='')
+selhi$inter <- paste(selhi$CHR_A,'-',selhi$CHR_B, sep='')
+
+tce$inter <- paste(tce$CHR_A,'-',tce$CHR_B, sep='')
+
+
 # confirm if we are doing it correctly
 chr_unq <- unique(p1in$inter)
 length(chr_unq)
@@ -770,7 +811,7 @@ print(myplot)
 dev.off()
 
 ## reorder x axis labels
-p1in$inter2 <- factor(p1in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
+clohi$inter2 <- factor(clohi$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
 				"lg9-lg9", "lg10-lg10", "lg11-lg11", "lg12-lg12", "lgX-lgX",
 				"lg1-lg2", "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6", "lg1-lg7", "lg1-lg8", "lg1-lg9",
 				"lg1-lg10", "lg1-lg11", "lg1-lg12", "lg1-lgX",
@@ -812,19 +853,19 @@ p2in$inter2 <- factor(p2in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "l
 #sub_p2in <- p1in[!(p2in$R2>=1),]
 
 # make error bars
-errbar_lims = group_by(p1in, inter2) %>%
+errbar_lims = group_by(clohi, inter2) %>%
 summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
 upper=mean+(2*se), lower=mean-(2*se))
 
 errbar_lims = group_by(p2in, inter2) %>%
-summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
+summarize(mea.ptn=mean(R2), se=sd(R2)/sqrt(n()),
 upper=mean+(2*se), lower=mean-(2*se))
 
 
 ##### final commands to make the main plot: all pairwise comparisons
 mean_se_violin =  ggplot() + 
-	geom_violin(data=p1in, aes(x= inter2, y = R2, colour=inter2)) +
-	geom_point(data=p1in, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
+	geom_violin(data=clohi, aes(x= inter2, y = R2, colour=inter2)) +
+	geom_point(data=clohi, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
 	geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
 	theme_minimal() +
 	theme(axis.text.x = element_text(angle = 45, size=4,  hjust=1), legend.position = "none")
@@ -837,15 +878,24 @@ mean_se_violin =  ggplot() +
 	theme(axis.text.x = element_text(angle = 45, size=4,  hjust=1), legend.position = "none")
 	
 	
-pdf(file="Tge_P2.ld_coords.pdf")
+png("clohi.ld_coords.png", width = 480, height = 480)
 print(mean_se_violin)
 dev.off()
 
+############################
+###### Plot LD decay #######
+############################
 
-### calculate LD decay 
 ggplot(p1in, aes(dist, r2)) +
 	geom_point() +
 		geom_smooth(formula=dist ~ r2, se=F)
+## we will estimate a smooth conditional mean
+# Loess smoothing is a process by which many statistical softwares do smoothing.
+# In ggplot2 this should be done when you have less than 1000 points,
+# otherwise it can be time consuming.
+
+
+
 
 
 # read in the readable file (after sed/bash tweaking)
@@ -855,20 +905,51 @@ p2dec <- read.delim("Tge.P2.coord.decay.ld", header=T)
 p1dec <- read.delim("Tms.P1.coord.decay.ld", header=T)
 p2dec <- read.delim("Tms.P2.coord.decay.ld", header=T)
 
+### simulations
+# cloning - no recombination
+clono <- read.delim("cloning-norecomb.lg.decay.ld")
+# cloning - low recombination
+clolow <- read.delim("cloning-lowrecomb.lg.decay.ld")
+# cloning - high recombination
+tce <- read.delim("cloning-highrecomb.lg.decay.ld")
 
+# selfing - no recombination
+selno <- read.delim("selfing-norecomb.lg.decay.ld")
+# selfing - low recombination
+sellow <- read.delim("selfing-lowrecomb.lg.decay.ld")
+# selfing - high recombination
+selhi <- read.delim("selfing-highrecomb.lg.decay.ld")
+
+
+
+### sexual species
+tce <- read.delim("Tce_alignedcoords.lg.maf.decay.ld")
 
 ## convert several columns as numeric
 cols = c(2, 5, 7);    
 p1dec[,cols] = apply(p1dec[,cols], 2, function(x) as.numeric(as.character(x)))
 p2dec[,cols] = apply(p2dec[,cols], 2, function(x) as.numeric(as.character(x)))
 
+clono[,cols] = apply(clono[,cols], 2, function(x) as.numeric(as.character(x)))
+clolow[,cols] = apply(clolow[,cols], 2, function(x) as.numeric(as.character(x)))
+clohi[,cols] = apply(clohi[,cols], 2, function(x) as.numeric(as.character(x)))
+
+tce[,cols] = apply(tce[,cols], 2, function(x) as.numeric(as.character(x)))
+
 # make new column : distance between SNPs
 p1dec$distance <- p1dec$BP_B - p1dec$BP_A
 p2dec$distance <- p2dec$BP_B - p2dec$BP_A
 
+clono$distance <- clono$BP_B - clono$BP_A
+clolow$distance <- clolow$BP_B - clolow$BP_A
+clohi$distance <- clohi$BP_B - clohi$BP_A
+
+tce$distance <- tce$BP_B - tce$BP_A
+
 ## plot
-install.packages("gridExtra")
+#install.packages("gridExtra")
 library("gridExtra")
+
 
 sub1 <- p1dec[(p1dec$CHR_A=="lg1"),]
 plot1<-ggplot(sub1, aes(distance, R2)) +
@@ -974,44 +1055,98 @@ plotX<-ggplot(subX, aes(distance, R2)) +
   ggtitle("lgX") +
   theme(axis.text = element_text(size=6))
 
-pdf("Tge_P1_LDdecay.pdf", width = 10, paper = 'a4')
+pdf("Tms_pop1_LDdecay.pdf", width = 10, paper = 'a4')
+png("Tms_pop1_LDdecay.png", width = 480, height = 480)
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8,
              plot9, plot10, plot11, plot12, plotX, ncol=4)
 
 dev.off()
+
+
 ggplot(p2dec, aes(distance, R2)) +
   geom_point() +
   facet_grid(CHR_A ~ .) +
   geom_smooth(formula=distance ~ R2, se=F)
 
 subs <- p2dec[(p2dec$CHR_A=="lg8"),]
-subs <- p1dec[(p1dec$CHR_A=="lg4"),]
+subs <- clono[(clono$CHR_A=="lg4"),]
 ggplot(subs, aes(distance, R2)) +
   geom_point() +
   facet_grid(CHR_A ~ .) +
   geom_smooth(formula=distance ~ R2, se=F)
 
 
+############################
+##### Plot LD heatmap ######
+############################
+## for managing the data
+library(dplyr)
+library(tidyr)
+## for the plots and colours
+library(ggplot2)
+library(hrbrthemes)
 
-#
+# read in the readable file (after sed/bash tweaking)
+# asex pops
+p1in <- read.delim("Tge_alignedcoords_P1.maf.inter.ld", header=T)
+p2in <- read.delim("Tge_alignedcoords_P2.maf.inter.ld", header=T)
+p1in <- read.delim("Tms_alignedcoords_P1.maf.inter.ld", header=T)
+p2in <- read.delim("Tms_alignedcoords_P2.maf.inter.ld", header=T)
+
+## To calculate mean per lg-lg interaction we will make a new column
+# make column with chr-chr
+p1in$inter <- paste(p1in$CHR_A,'-',p1in$CHR_B, sep='')
+p2in$inter <- paste(p2in$CHR_A,'-',p2in$CHR_B, sep='')
+
+## to calculate the mean per group (lg - lg groups)
+p1in_mean <- aggregate(p1in[, 7], list(p1in$inter), mean)
+p2in_mean <- aggregate(p2in[, 7], list(p2in$inter), mean)
+
+## set the colnames
+colnames(p1in_mean) <- c("inter", "R2")
+colnames(p2in_mean) <- c("inter", "R2")
+
+
+### pop1
+dat1 <- data.frame(t(matrix(
+                     unlist(strsplit(as.vector(p1in_mean$inter), split = "-")), 
+                     ncol = length(p1in_mean$inter), nrow = 2)))
+names(dat1) <- c("lga", "lgb")
+dat3 <- cbind(dat1, p1in_mean$R2)
+
+
+### pop2
+dat1 <- data.frame(t(matrix(
+                     unlist(strsplit(as.vector(p2in_mean$inter), split = "-")), 
+                     ncol = length(p2in_mean$inter), nrow = 2)))
+names(dat1) <- c("lga", "lgb")
+dat3 <- cbind(dat1, p2in_mean$R2)
 
 
 
+## common part for Pop1 and Pop2
+dat4 <- dat3[,c(2,1,3)]
+colnames(dat3) <- c("lga", "lgb", "R2")
+colnames(dat4) <- c("lga", "lgb", "R2")
+dat5 <- rbind(dat3, dat4)
+dat5$lga <- factor(dat5$lga, levels = c("lg1", "lg2", "lg3", "lg4", "lg5", "lg6", "lg7", "lg8",
+				"lg9", "lg10", "lg11", "lg12", "lgX"))
+dat5$lgb <- factor(dat5$lgb, levels = c("lg1", "lg2", "lg3", "lg4", "lg5", "lg6", "lg7", "lg8",
+				"lg9", "lg10", "lg11", "lg12", "lgX"))
 
+## test before printing
+ggplot(data = dat5, aes(x = lga, y = lgb)) +
+  geom_tile(aes(fill = R2)) 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+png("Tms_pop1_heatmap.png", width = 580, height = 480)
+png("Tms_pop2_heatmap.png", width = 580, height = 480)
+ggplot(data = dat5, aes(x = lga, y = lgb)) +
+  geom_tile(aes(fill = R2)) +
+  ggtitle(label = "Tms - pop 2 - LD per lg") +
+    #edit legends : guide = guide_legend(reverse = TRUE) will reverse the order in the legend
+  scale_fill_distiller(palette="RdPu", trans = "reverse", guide = guide_legend(reverse = TRUE)) +
+  theme_ipsum()
+dev.off()
 
 
 
@@ -1109,6 +1244,38 @@ het2$INDV <- factor(het2$INDV, levels = het2$INDV)
 het3$INDV <- factor(het3$INDV, levels = het3$INDV)
 
 
+
+
+##### plot allelic frequency
+### all pop
+## reading csv with repeated row names: row.names = NULL
+Tms <- read.csv2(file = "Tms.coords.allclean.frq", header=T, sep='\t', row.names = NULL)
+cols = c(2, 3, 4, 5, 6);    
+Tms[,cols] = apply(Tms[,cols], 2, function(x) as.numeric(as.character(x)))
+png("Tms_2pops_allelicfreqP.png", width = 480, height = 480)
+ggplot(Tms, aes(x = CHROM, y = p, fill = CHROM)) +
+  geom_boxplot()
+dev.off()
+
+### div pop
+## eliminated all positions in each pop with freq = 1 (because pops were called together, several SNPs are fixed between pops)
+Tms <- read.csv2(file = "Tms.pop1.coordsclean2.frq", header=T, sep='\t', row.names = NULL)
+cols = c(2, 3, 4, 5, 6, 7);    
+Tms[,cols] = apply(Tms[,cols], 2, function(x) as.numeric(as.character(x)))
+png("Tms_divpop_pop1_allelicfreqP_withoutfreq1.png", width = 480, height = 480)
+ggplot(Tms, aes(x = CHROM, y = max, fill = CHROM)) +
+  geom_boxplot()
+dev.off()
+
+
+
+Tms2 <- read.csv2(file = "Tms.pop2.coordsclean2.frq", header=T, sep='\t', row.names = NULL)
+cols = c(2, 3, 4, 5, 6, 7);    
+Tms2[,cols] = apply(Tms2[,cols], 2, function(x) as.numeric(as.character(x)))
+png("Tms_divpop_pop2_allelicfreqP_withoutfreq1.png", width = 480, height = 480)
+ggplot(Tms2, aes(x = CHROM, y = max, fill = CHROM)) +
+  geom_boxplot()
+dev.off()
 
 
 

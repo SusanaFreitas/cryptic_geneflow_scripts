@@ -188,6 +188,16 @@ write.table(qlist, "GVCFall.DP.percentiles.txt")
 ################ 8.1) Filter by DP - "DP < 8 || DP > 200" ####################
 ##############################################################################
 
+## but first we need to create a dictionary for the fasta reference with Picard
+module load UHTS/Analysis/picard-tools/2.9.0
+picard-tools CreateSequenceDictionary REFERENCE=3_Tce_b3v08.fasta OUTPUT=3_Tce_b3v08.dict
+picard-tools CreateSequenceDictionary REFERENCE=3_Tcm_b3v08.fasta OUTPUT=3_Tcm_b3v08.dict
+
+## and samtools faidx
+#samtools faidx 3_Tce_b3v08.fasta
+#samtools faidx 2_Tcm_b3v08.fasta
+
+
 ##### - keep reads DP > 8 and DP < 200
 #### gatk ####
 GenomeAnalysisTK VariantFiltration \
@@ -285,6 +295,10 @@ vcflib vcfallelicprimitives -kg Tms.fb.QUALpy.vcf > Tms.fb_posvcflib.vcf
 vcflib vcfallelicprimitives -kg Tms.trim2.QUALpy.vcf > Tms.trim2_posvcflib.vcf
 vcflib vcfallelicprimitives -kg Tms.trim3.QUALpy.vcf > Tms.trim3_posvcflib.vcf
 
+vcflib vcfallelicprimitives -kg Tce_QUALpy.vcf > Tce_posvcflib.vcf
+vcflib vcfallelicprimitives -kg Tcm_QUALpy.vcf > Tcm_posvcflib.vcf
+
+
 
 
 ###########################################################################
@@ -298,6 +312,9 @@ vcftools --recode --recode-INFO-all --vcf Tms.trim2_posvcflib.vcf --max-missing 
 vcftools --recode --recode-INFO-all --vcf Tms.fb_posvcflib.vcf --max-missing 0.75 --out Tms.fbmissfilt
 vcftools --recode --recode-INFO-all --vcf Tge.stacks.DP_filter.vcf --max-missing 0.75 --out Tge.missfilt
 
+vcftools --recode --recode-INFO-all --vcf Tce_posvcflib.vcf --max-missing 0.75 --out Tce_missfilt
+vcftools --recode --recode-INFO-all --vcf Tcm_posvcflib.vcf --max-missing 0.75 --out Tcm_missfilt
+
 
 
 ###########################################################################
@@ -308,10 +325,13 @@ vcftools --recode --recode-INFO-all --vcf Tge.stacks.DP_filter.vcf --max-missing
 
 grep -v 'TYPE=snp,' Tms.trim3missfilt.recode.vcf > Tms.trim3.bial.vcf
    
-grep -v 'TYPE=snp,' Tms.fbmissfilt.recode.vcf > Tms.fb.bial.vcf
-grep -v 'TYPE=ins' Tms.fb.bial.vcf > Tms.fb.bial2.vcf 
-grep -v 'TYPE=del' Tms.fb.bial2.vcf > Tms.fb.bial3.vcf 
+grep -v 'TYPE=snp,' Tcm_missfilt.recode.vcf > Tcm.bial.vcf
+grep -v 'TYPE=ins' Tcm.bial.vcf > Tcm.bial2.vcf 
+grep -v 'TYPE=del' Tcm.bial2.vcf > Tcm.bial3.vcf 
 
+grep -v 'TYPE=snp,' Tce_missfilt.recode.vcf > Tce.bial.vcf
+grep -v 'TYPE=ins' Tce.bial.vcf > Tce.bial2.vcf 
+grep -v 'TYPE=del' Tce.bial2.vcf > Tce.bial3.vcf 
 
 grep -v 'TYPE=snp,' Tms.trim2missfilt.recode.vcf > Tms.trim2.bial.vcf
 grep -v 'TYPE=ins' Tms.trim2.bial.vcf > Tms.trim2.bial2.vcf 
@@ -326,6 +346,58 @@ grep -v 'TYPE=del' Tms.trim3.bial2.vcf > Tms.trim3.bial3.vcf
           #######################################################
 ####### ~~~~~~~~~~ end of mapping - SNPs calling pipeline ~~~~~~~~~ ########
           #######################################################
+
+
+
+
+
+#### repeat for sexual species
+
+
+## more inds than 23 - select the 23 with higher coverage
+vcftools --vcf Tce.bial3.vcf --missing-indv --out Tce
+vcftools --vcf Tcm.bial3.vcf --missing-indv --out Tcm
+
+### filter only 23 samples - 23 first
+
+vcflib vcfkeepsamples Tce.bial3.vcf tce_m6.bam tce_m41.bam tce_m9.bam tce_m3.bam tce_m37.bam tce_m32.bam \
+	tce_m29.bam tce_m8.bam tce_m22.bam tce_m21.bam tce_m1.bam tce_m19.bam tce_m18.bam tce_m2.bam tce_m14.bam \
+	tce_m35.bam tce_m34.bam tce_m15.bam tce_m28.bam tce_m20.bam tce_m26.bam tce_m38.bam tce_m13.bam > Tce_sample23.vcf
+
+vcflib vcfkeepsamples Tcm.bial3.vcf tcm_m8.bam tcm_m3.bam tcm_m38.bam tcm_m36.bam tcm_m35.bam tcm_m34.bam \
+	tcm_m31.bam tcm_m2.bam tcm_m24.bam tcm_m23.bam tcm_m1.bam tcm_f1.bam tcm_f12.bam tcm_f10.bam tcm_f11.bam \
+	tcm_m6.bam tcm_m20.bam tcm_m11.bam tcm_m22.bam tcm_m15.bam tcm_m13.bam tcm_m14.bam tcm_m16.bam > Tcm_sample23.vcf
+
+## filter only SNPs tjat are aligned and have lg coordinates
+python3 '/home/susana/Dropbox/Timema_cryptic_geneflow/cryptic_geneflow_scripts/filter_Mummer_snps.py' -i Tcm_sample23.vcf -d 2_Tcm_scf_block_alignment.tsv -o Tcm_alignedcoords.vcf -s Tcm
+
+python3 '/home/susana/Dropbox/Timema_cryptic_geneflow/cryptic_geneflow_scripts/filter_Mummer_snps.py' -i Tce_sample23.vcf -d 3_Tce_scf_block_alignment.tsv -o Tce_alignedcoords.vcf -s Tce
+
+
+##### Calculate LD
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --vcf Tcm_alignedcoords.vcf --make-bed --out Tcm_alignedcoords.lg --allow-extra-chr --recode
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --file Tcm_alignedcoords.lg --maf 0.2 --recode --out Tcm_alignedcoords.lg.maf --allow-extra-chr --make-bed
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --file Tcm_alignedcoords.lg.maf --r2 inter-chr --ld-window-r2 0 --allow-extra-chr --out Tcm_alignedcoords.lg.maf.inter
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tcm_alignedcoords.lg.maf --r2 --ld-window-r2 0 --ld-window 999999 --ld-window-kb 8000 --out Tcm_alignedcoords.lg.maf.decay --allow-extra-chr
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --vcf Tce_alignedcoords.vcf --make-bed --out Tce_alignedcoords.lg --allow-extra-chr --recode
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --file Tce_alignedcoords.lg --maf 0.2 --recode --out Tce_alignedcoords.lg.maf --allow-extra-chr --make-bed
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --file Tce_alignedcoords.lg.maf --r2 inter-chr --ld-window-r2 0 --allow-extra-chr --out Tce_alignedcoords.lg.maf.inter
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tce_alignedcoords.lg.maf --r2 --ld-window-r2 0 --ld-window 999999 --ld-window-kb 8000 --out Tce_alignedcoords.lg.maf.decay --allow-extra-chr
+#
+
+## calculate heterozygosity
+for i in {10..32}; do grep -v '^#' Tcm_alignedcoords.vcf | awk -v i="$i" '{ print $i}' | grep '1/0' | wc -l; done
+for i in {10..32}; do grep -v '^#' Tcm_alignedcoords.vcf | awk -v i="$i" '{ print $i}' | grep '0/1' | wc -l; done
+for i in {10..32}; do grep -v '^#' Tcm_alignedcoords.vcf | awk -v i="$i" '{ print $i}' | grep '1|0' | wc -l; done
+for i in {10..32}; do grep -v '^#' Tcm_alignedcoords.vcf | awk -v i="$i" '{ print $i}' | grep '0|1' | wc -l; done
+for i in {10..32}; do grep -v '^#' Tcm_alignedcoords.vcf | awk -v i="$i" '{ print $i}' | grep '1/1' | wc -l; done
+for i in {10..32}; do grep -v '^#' Tcm_alignedcoords.vcf | awk -v i="$i" '{ print $i}' | grep '1|1' | wc -l; done
+for i in {10..32}; do grep -v '^#' Tcm_alignedcoords.vcf | awk -v i="$i" '{ print $i}' | grep '0/0' | wc -l; done
+for i in {10..32}; do grep -v '^#' Tcm_alignedcoords.vcf | awk -v i="$i" '{ print $i}' | grep '0|0' | wc -l; done
+
+
+
 
 
 

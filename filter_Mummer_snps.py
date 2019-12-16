@@ -32,7 +32,8 @@ for opt, arg in opts:
 		print(" The output is another vcf file with the SNPs that are present in the block alignment, and excluding the SNPs that are not in that file.\n")
 		print("-i input vcf file name")
 		print("-d scaffold coordinates file")
-		print("-o name of the output vcf file \n")
+		print("-o name of the output vcf file")
+		print("-s species code (Tcm, Tce, Tms, Tge) \n")
 		sys.exit(2)
 	elif opt in ("-i"):
 		vcf_filename = arg
@@ -275,6 +276,62 @@ elif sps == "Tge":
 					 'Gepop2.9', 'Gepop2.10', 'Gepop2.11', 'Gepop2.12', 'Gepop2.13', 'Gepop2.14', 'Gepop2.15',
 					 'Gepop2.16', 'Gepop2.17', 'Gepop2.18', 'Gepop2.19', 'Gepop2.20', 'Gepop2.21', 'Gepop2.22',
 					 'Gepop2.23']
+
+### if sps is Tcm ###
+if sps == "Tcm":
+	wanted = ['lg', 'POSnew', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT',
+			'tcm_m8.bam', 'tcm_m3.bam', 'tcm_m38.bam', 'tcm_m36.bam', 'tcm_m35.bam', 'tcm_m34.bam',
+			'tcm_m31.bam', 'tcm_m2.bam', 'tcm_m24.bam', 'tcm_m23.bam', 'tcm_m1.bam', 'tcm_f1.bam',
+			'tcm_f12.bam', 'tcm_f10.bam', 'tcm_f11.bam', 'tcm_m6.bam', 'tcm_m20.bam', 'tcm_m11.bam',
+			'tcm_m22.bam', 'tcm_m15.bam', 'tcm_m13.bam', 'tcm_m14.bam', 'tcm_m16.bam']
+
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	tcm_m8.bam	tcm_m3.bam	tcm_m38.bam	tcm_m36.bam	tcm_m35.bam	tcm_m34.bam	tcm_m31.bamtcm_m2.bam	tcm_m24.bam	tcm_m23.bam	tcm_m1.bam	tcm_f1.bam	tcm_f12.bam	tcm_f10.bam	tcm_f11.bam	tcm_m6.bam	tcm_m20.bam	tcm_m11.bam	tcm_m22.bam	tcm_m15.bam	tcm_m13.bam	tcm_m14.bam	tcm_m16.bam
+	newdf = vcf_file[wanted]
+
+# sort by lg and coordinate columns
+	newdf.sort_values(by=['lg','POSnew'], inplace=True)
+## check if column names are the wanted ones
+# newdf.head()
+# for col in newdf.columns: 
+#     print(col)
+	
+## how to change columns names
+# method 1: substitute
+	newdf.columns = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT',
+			 'tcm_m8.bam', 'tcm_m3.bam', 'tcm_m38.bam', 'tcm_m36.bam', 'tcm_m35.bam', 'tcm_m34.bam',
+			'tcm_m31.bam', 'tcm_m2.bam', 'tcm_m24.bam', 'tcm_m23.bam', 'tcm_m1.bam', 'tcm_f1.bam',
+			'tcm_f12.bam', 'tcm_f10.bam', 'tcm_f11.bam', 'tcm_m6.bam', 'tcm_m20.bam', 'tcm_m11.bam',
+			'tcm_m22.bam', 'tcm_m15.bam', 'tcm_m13.bam', 'tcm_m14.bam', 'tcm_m16.bam']
+
+
+### if sps is Tce ###
+if sps == "Tce":
+	wanted = ['lg', 'POSnew', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT',
+			'tce_m6.bam', 'tce_m41.bam', 'tce_m9.bam', 'tce_m3.bam', 'tce_m37.bam', 'tce_m32.bam',
+			'tce_m29.bam', 'tce_m8.bam', 'tce_m22.bam', 'tce_m21.bam', 'tce_m1.bam', 'tce_m19.bam',
+			'tce_m18.bam', 'tce_m2.bam', 'tce_m14.bam', 'tce_m35.bam', 'tce_m34.bam', 'tce_m15.bam',
+			'tce_m28.bam', 'tce_m20.bam', 'tce_m26.bam', 'tce_m38.bam', 'tce_m13.bam']
+
+
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	tce_m6.bam	tce_m41.bam	tce_m9.bam	tce_m3.bam	tce_m37.bam	tce_m32.bam	tce_m29.bamtce_m8.bam	tce_m22.bam	tce_m21.bam	tce_m1.bam	tce_m19.bam	tce_m18.bam	tce_m2.bam	tce_m14.bam	tce_m35.bam	tce_m34.bam	tce_m15.bam	tce_m28.bam	tce_m20.bam	tce_m26.bam	tce_m38.bam	tce_m13.bam
+	newdf = vcf_file[wanted]
+
+# sort by lg and coordinate columns
+	newdf.sort_values(by=['lg','POSnew'], inplace=True)
+## check if column names are the wanted ones
+# newdf.head()
+# for col in newdf.columns: 
+#     print(col)
+	
+## how to change columns names
+# method 1: substitute
+	newdf.columns = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER', 'INFO', 'FORMAT',
+			'tce_m6.bam', 'tce_m41.bam', 'tce_m9.bam', 'tce_m3.bam', 'tce_m37.bam', 'tce_m32.bam',
+			'tce_m29.bam', 'tce_m8.bam', 'tce_m22.bam', 'tce_m21.bam', 'tce_m1.bam', 'tce_m19.bam',
+			'tce_m18.bam', 'tce_m2.bam', 'tce_m14.bam', 'tce_m35.bam', 'tce_m34.bam', 'tce_m15.bam',
+			'tce_m28.bam', 'tce_m20.bam', 'tce_m26.bam', 'tce_m38.bam', 'tce_m13.bam']
+
+
 
 
 	newdf.to_csv('newnames.csv', sep = '\t', index = False)
