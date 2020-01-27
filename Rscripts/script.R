@@ -227,7 +227,14 @@ dev.off()
 
 ######## LOOKING FOR POLYPLOIDS #######
 ######## READ AO AND RO values ########
+setwd("/home/susana/Dropbox/Timema_cryptic_geneflow/monikensis/trimmed/DPfiltered")
 ratio <- read.csv2("tms.trim3.lg.DPratio.txt", sep=",", header=T)
+ratio <- read.csv2("tms.trim3.scafs.DPratio.txt", sep=",", header=T)
+ratio <- read.csv2("tms.trim3.DPratio.normalsamples.csv", sep="\t", header=T)
+## file with only P2 inds, and without Tms18 (low DP) - filtered only the HETEROZYGOUS pos
+# so, this file excludes (NA) all "0/0", and "1/1" pos
+ratio <- read.csv2("tms.trim3.scafs.DPratio_onlyhet.txt", sep=",", header=T)
+
 
 library(ggplot2)
 library(reshape2)
@@ -246,6 +253,12 @@ ratioclean$variable <- factor(ratioclean$variable, levels = c("Tms1_P1","Tms2_P1
 			"Tms18_P1","Tms19_P1","Tms20_P1","Tms21_P1","Tms22_P1","Tms23_P1","Tms1_P2","Tms2_P2","Tms3_P2","Tms4_P2",
 			"Tms5_P2","Tms6_P2","Tms7_P2","Tms8_P2","Tms9_P2","Tms10_P2","Tms11_P2","Tms12_P2","Tms13_P2","Tms14_P2",
 			"Tms15_P2","Tms16_P2","Tms17_P2","Tms18_P2","Tms19_P2","Tms20_P2","Tms21_P2","Tms22_P2","Tms23_P2"))
+## if only "normal" samples form P2
+ratioclean$variable <- factor(ratioclean$variable, levels = c("Tms1_P2","Tms2_P2","Tms3_P2","Tms4_P2",
+			"Tms5_P2","Tms6_P2","Tms7_P2","Tms8_P2","Tms9_P2","Tms10_P2","Tms11_P2","Tms12_P2","Tms13_P2","Tms14_P2",
+			"Tms15_P2","Tms16_P2","Tms17_P2","Tms19_P2","Tms20_P2","Tms21_P2","Tms22_P2","Tms23_P2"))
+# exclude samples with low DP
+ratioclean <- ratioclean[ !(ratioclean$variable %in% c("Tms13_P1", "Tms18_P2")), ]
 
 ### make a barplot of counts: count the number of positions per ratio class
 # Instead of faceting with a variable in the horizontal or vertical direction,
@@ -259,6 +272,31 @@ ggplot(ratioclean, aes(x=value)) +
 	theme(strip.text.x = element_text(size = 7, colour = "black", angle = 0),axis.text=element_text(size=6),
         axis.title=element_text(size=6,face="bold"))
 dev.off()
+
+### plot by lg, and without outliers
+png("Tce_DPratio_onlyhet_counts-zoom.png", width = 1580, height = 1500)
+ratioclean <- ratioclean[ !(ratioclean$variable %in% c("Tms1_P2", "Tms17_P2", "Tms19_P2", "Tms22_P2")), ]
+ggplot(ratioclean, aes(x=value)) +
+	geom_histogram(aes(fill=X.CHROM),binwidth=.05, stat = "count") +
+#	geom_density(aes(x = value, fill = X.CHROM), alpha = 0.2) + xlim(c(0.1,1)) +
+	facet_wrap(~X.CHROM, ncol=6) +  
+	xlim(c(0.0,1)) + ylim(c(0, 2000)) +
+	theme(strip.text.x = element_text(size = 7, colour = "black", angle = 0),axis.text=element_text(size=6),
+        axis.title=element_text(size=6,face="bold"))
+dev.off()
+
+### plot by lg, only outliers
+png("Tms_P2_DPratio_onlyhet_oulyoutliers_density.png", width = 1580, height = 1500)
+ratioclean <- ratioclean[ ratioclean$variable %in% c("Tms1_P2", "Tms17_P2", "Tms19_P2", "Tms22_P2"), ]
+ggplot(ratioclean, aes(x=value)) +
+#	geom_histogram(aes(fill = X.CHROM),binwidth=.05, stat = "count") +
+	geom_density(aes(x = value, fill = X.CHROM), alpha = 0.2) + xlim(c(0.1,1)) +
+	facet_wrap(~X.CHROM, ncol=6) +  
+#	xlim(c(0.0,1)) + ylim(c(0, 100)) +
+	theme(strip.text.x = element_text(size = 7, colour = "black", angle = 0),axis.text=element_text(size=6),
+        axis.title=element_text(size=6,face="bold"))
+dev.off()
+
 
 
 ## subset data and plot only a few samples
@@ -513,6 +551,21 @@ colnames(lg1) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "
 
 
 #### Tge ####
+lg1 <- read.csv2(file = "Tge_lg1_coord.csv", header=T, sep='\t')
+lg2 <- read.csv2(file = "Tge_lg2_coord.csv", header=T, sep='\t')
+lg3 <- read.csv2(file = "Tge_lg3_coord.csv", header=T, sep='\t')
+lg4 <- read.csv2(file = "Tge_lg4_coord.csv", header=T, sep='\t')
+lg5 <- read.csv2(file = "Tge_lg5_coord.csv", header=T, sep='\t')
+lg6 <- read.csv2(file = "Tge_lg6_coord.csv", header=T, sep='\t')
+lg7 <- read.csv2(file = "Tge_lg7_coord.csv", header=T, sep='\t')
+lg8 <- read.csv2(file = "Tge_lg8_coord.csv", header=T, sep='\t')
+lg9 <- read.csv2(file = "Tge_lg9_coord.csv", header=T, sep='\t')
+lg10 <- read.csv2(file = "Tge_lg10_coord.csv", header=T, sep='\t')
+lg11 <- read.csv2(file = "Tge_lg11_coord.csv", header=T, sep='\t')
+lg12 <- read.csv2(file = "Tge_lg12_coord.csv", header=T, sep='\t')
+lgX <- read.csv2(file = "Tge_lgX_coord.csv", header=T, sep='\t')
+
+#### Tms ####
 lg1 <- read.csv2(file = "Tms_lg1_coord.csv", header=T, sep='\t')
 lg2 <- read.csv2(file = "Tms_lg2_coord.csv", header=T, sep='\t')
 lg3 <- read.csv2(file = "Tms_lg3_coord.csv", header=T, sep='\t')
@@ -527,6 +580,18 @@ lg11 <- read.csv2(file = "Tms_lg11_coord.csv", header=T, sep='\t')
 lg12 <- read.csv2(file = "Tms_lg12_coord.csv", header=T, sep='\t')
 lgX <- read.csv2(file = "Tms_lgX_coord.csv", header=T, sep='\t')
 
+# sexual offspring
+Tmssex <- read.csv2(file = "Tms_sexual_offspring_withoutoutliers.csv", header=T, sep='\t')
+# make new column - ind name unique
+Tmssex$sample <- paste(Tmssex$P1, Tmssex$P2, sep = "_")
+Tmssex$P1 <- NULL
+Tmssex$P2 <- NULL
+Tmssex$het <- NULL
+Tmssex$hom <- NULL
+Tmssex$het_hethom <- as.numeric(as.character(Tmssex$het_hethom))
+
+
+het_hethom
 
 ### change colnames to something readable and writeable
 colnames(lg1) <- c("sample", "het10", "het01", "het10phs",	"het01phs", "trim", "sum(het)", 
@@ -601,32 +666,45 @@ lg11$lg <- rep("lg11",times = 46)
 lg12$lg <- rep("lg12",times = 46)
 lgX$lg <- rep("lgX",times = 46)
 
-### concatenate all veritcally
+
+
+## Tge
+### concatenate all vertically
 Tgecat <- do.call("rbind", list(lg1, lg2, lg3, lg4, lg5, lg6, lg7, lg8, lg9, lg10, lg11, lg12, lgX))
 
 ## plot by indv order
-Tgecat$sampleno <- factor(Tgecat$sampleno, levels = c("Gepop1.1", "Gepop1.2", "Gepop1.3", "Gepop1.4",
-                                                  "Gepop1.5", "Gepop1.6", "Gepop1.7", "Gepop1.8" ,
-                                                   "Gepop1.9", "Gepop1.10", "Gepop1.11", "Gepop1.12",
-                                                 "Gepop1.13", "Gepop1.14", "Gepop1.15", "Gepop1.16",
-                                                  "Gepop1.17", "Gepop1.18", "Gepop1.19", "Gepop1.20",
-                                                  "Gepop1.21", "Gepop1.22", "Gepop1.23"))
+# Tgecat$sampleno <- factor(Tgecat$sampleno, levels = c("Gepop1.1", "Gepop1.2", "Gepop1.3", "Gepop1.4",
+#                                                  "Gepop1.5", "Gepop1.6", "Gepop1.7", "Gepop1.8" ,
+#                                                   "Gepop1.9", "Gepop1.10", "Gepop1.11", "Gepop1.12",
+#                                                 "Gepop1.13", "Gepop1.14", "Gepop1.15", "Gepop1.16",
+#                                                  "Gepop1.17", "Gepop1.18", "Gepop1.19", "Gepop1.20",
+#                                                  "Gepop1.21", "Gepop1.22", "Gepop1.23"))
+
 Tgecat$sampleno <- factor(Tgecat$sampleno, levels = c("1", "2", "3", "4", "5", "6", "7", 
                                                       "8", "9", "10", "11", "12", "13", "14", "15", 
                                                       "16", "17", "18", "19", "20", "21", "22", "23"))
+Tgecat$lg <- factor(Tgecat$lg, levels = c("lg1", "lg2", "lg3", "lg4", "lg5", "lg6", "lg7", 
+                                                      "lg8", "lg9", "lg10", "lg11", "lg12", "lgX"))
+
+# exclude samples with low DP
+Tgecat <- Tgecat[ !(Tgecat$sample %in% c("Gepop2.6", "Gepop2.2", "Gepop2.5")), ]
+
+
 ## convert several columns as numeric
 cols = c(2:5, 7:15, 17:20);    
 Tgecat[,cols] = apply(Tgecat[,cols], 2, function(x) as.numeric(as.character(x)))
-
+POP
 
 
 library(ggplot2)
 #install.packages("ggplot2")
 pdf(file="het-all-DPcorrected.pdf", width=10)
-ggplot(data = Tgecat, mapping = aes(x = lg, y = Tgecat$het_hethom, colour = POP)) +
+png("Tge_het_bylg.png", width = 580, height = 500)
+ggplot(data = Tgecat, mapping = aes(x = lg, y = het_hethom, colour = POP)) +
   geom_point() +
+  scale_color_manual(values=transp(funky(2),.6)) 
 #  facet_grid(sample ~ .) +
-  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
+#  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
 dev.off()
 
 ggplot(data = Tgecat, mapping = aes(x = lg, y = het_hethom, colour=POP)) +
@@ -634,12 +712,17 @@ ggplot(data = Tgecat, mapping = aes(x = lg, y = het_hethom, colour=POP)) +
   #  facet_grid(sample ~ .) +
   theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
 
-pdf(file="Tge_ratio_het_all.pdf", width=10)
+
+png("Tge_ratio_het_all-points-lim.png", width = 580, height = 480)
+png("Tge_ratio_het_all-boxplot-lim.png", width = 580, height = 480)
 ggplot(data = Tgecat, mapping = aes(x = lg, y = het_hethom, colour=POP)) +
   geom_boxplot() +
+#  geom_point(shape= Tgecat$sampleno) +
   #  facet_grid(sample ~ .) +
-  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8)) +
-  ylim(0, 0.05)
+  theme(axis.text.x = element_text(angle = 0,  vjust = -0.01, size=8)) +
+  ggtitle("Heterozygosity - Tge") +
+  ylim(0, 0.6) +
+  scale_color_manual(values=transp(funky(2),.6)) 
 dev.off()
 
 
@@ -651,11 +734,141 @@ ggplot(data = Tgecat, mapping = aes(x = lg, y = hom_homhet, colour=POP)) +
   ylim(0.9, 1.0)
 
 
+## Tms
+### concatenate all vertically
+Tmscat <- do.call("rbind", list(lg1, lg2, lg3, lg4, lg5, lg6, lg7, lg8, lg9, lg10, lg11, lg12, lgX))
+
+keeps <- c("lg","sample", "het_hethom")
+Tmscat = Tmscat[keeps]
+Tmscat$real
+
+
+
+
+
+
+## plot by indv order
+# Tgecat$sampleno <- factor(Tgecat$sampleno, levels = c("Gepop1.1", "Gepop1.2", "Gepop1.3", "Gepop1.4",
+#                                                  "Gepop1.5", "Gepop1.6", "Gepop1.7", "Gepop1.8" ,
+#                                                   "Gepop1.9", "Gepop1.10", "Gepop1.11", "Gepop1.12",
+#                                                 "Gepop1.13", "Gepop1.14", "Gepop1.15", "Gepop1.16",
+#                                                  "Gepop1.17", "Gepop1.18", "Gepop1.19", "Gepop1.20",
+#                                                  "Gepop1.21", "Gepop1.22", "Gepop1.23"))
+
+Tmscat$sampleno <- factor(Tmscat$sampleno, levels = c("1", "2", "3", "4", "5", "6", "7", 
+                                                      "8", "9", "10", "11", "12", "13", "14", "15", 
+                                                      "16", "17", "18", "19", "20", "21", "22", "23"))
+Tmscat$lg <- factor(Tmscat$lg, levels = c("lg1", "lg2", "lg3", "lg4", "lg5", "lg6", "lg7", 
+                                                      "lg8", "lg9", "lg10", "lg11", "lg12", "lgX"))
+
+# exclude samples with low DP
+Tmscat <- Tmscat[ !(Tmscat$sample %in% c("Tms13_P1", "Tms18_P2")), ]
+
+
+## convert several columns as numeric
+cols = c(2:5, 7:15, 17:20);    
+Tmscat[,cols] = apply(Tmscat[,cols], 2, function(x) as.numeric(as.character(x)))
+
+
+
+library(ggplot2)
+#install.packages("ggplot2")
+pdf(file="het-all-DPcorrected.pdf", width=10)
+ggplot(data = Tmscat, mapping = aes(x = lg, y = Tmscat$het_hethom, colour = POP)) +
+  geom_point() +
+#  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
+dev.off()
+
+ggplot(data = Tmscat, mapping = aes(x = lg, y = het_hethom, colour=POP)) +
+  geom_boxplot() +
+  #  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
+
+
+png("Tms_ratio_het_all-points.png", width = 580, height = 480)
+png("Tms_ratio_het_all-boxplot.png", width = 580, height = 480)
+ggplot(data = Tmscat, mapping = aes(x = lg, y = het_hethom, colour=POP)) +
+  geom_boxplot() +
+#  geom_point(shape= Tmscat$sampleno) +
+  #  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 0,  vjust = -0.01, size=8)) +
+  ggtitle("Heterozygosity - Tms") +
+  scale_color_manual(values=transp(funky(2),.6))
+  #+
+ # ylim(0, 0.05)
+dev.off()
+
+
+### plot asexuals and simulate sexual offspring
+
+png("Tms_het_simulated.png", width = 580, height = 480)
+ggplot() +
+  geom_boxplot(data = Tmssex, mapping = aes(x = lg, y = het_hethom)) +
+  geom_boxplot(data = Tmscat, mapping = aes(x = lg, y = het_hethom, colour = POP)) +
+#  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
+dev.off()
+
+
+
+#### select only lg8 outliers in the simulated sexual offspring
+subTmssex <- Tmssex[ which(Tmssex$lg=='lg8'
+& Tmssex$het_hethom > 0.6), ]
+
+subTmssex <- Tmssex[ which(Tmssex$lg=='lg1' & Tmssex$het_hethom > 0.25), ]
+subTmssex <- Tmssex[ which(Tmssex$lg=='lg7' & Tmssex$het_hethom > 0.2), ]
+
+
+
+### all outliers are with individual Tms23_P2
+subTmscat <- Tmscat[ which(Tmscat$sample=='Tms23_P2'), ]
+
+png("Tms_het_simulated_weird.png", width = 580, height = 480)
+ggplot() +
+  geom_boxplot(data = Tmssex, mapping = aes(x = lg, y = het_hethom)) +
+  geom_boxplot(data = Tmscat, mapping = aes(x = lg, y = het_hethom, colour = POP)) +
+  geom_point(data = subTmscat, mapping = aes(x = lg, y = het_hethom), colour = "darkmagenta", shape = 8) +
+#  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8))
+dev.off()
+
+png("Tms_het_P1_lines-zoom.png", width = 580, height = 480)
+TmsP1 <- Tmscat[ which(Tmscat$POP=='P1'), ]
+ggplot(data = TmsP1, mapping = aes(x = lg, y = het_hethom, group = sample, colour = sample)) +
+  geom_line() +
+#  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8)) +
+  ylim(0,0.05)
+dev.off()
+
+png("Tms_het_simulatedsexualoffspring.png", width = 580, height = 480)
+ggplot(data = Tmssex, mapping = aes(x = lg, y = het_hethom, group = sample, colour = sample)) +
+  geom_line() +
+#  facet_grid(sample ~ .) +
+  theme(axis.text.x = element_text(angle = 90,  vjust = -0.01, size=8), legend.position = "none")
+dev.off()
+
+
+## remove low DP samples
+# Tms
+# Tms13_P1 and Tms18_P2
+# Tge
+# Gepop2.6, Gepop2.2 and Gepop2.5
+
+
 #######################################################
 ################ ANALYSE LD RESULTS ###################
 #######################################################
 setwd("C:/Users/User/Dropbox/Timema_cryptic_geneflow/mapping_scaf_coordinates_new/test_plink/allinds/heterozygosity")
+setwd("C:/Users/User/Dropbox/Timema_cryptic_geneflow/mapping_scaf_coordinates_new/test_plink/divpop/linkage_plots")
 setwd("C:/Users/User/Dropbox/Timema_cryptic_geneflow/simulations/files_plot_R")
+setwd("C:/Users/User/Dropbox/Timema_cryptic_geneflow/simulations/files_plot_R")
+
+setwd("C:/Users/User/Documents/plink/plink_win64_20191130")
+
+
+
 
 ls()
 LD <- read.delim(file = "test.geno.ld", header = TRUE)
@@ -741,13 +954,16 @@ p1in <- read.delim("Tge_alignedcoords_P1.maf.inter.ld", header=T)
 p2in <- read.delim("Tge_alignedcoords_P2.maf.inter.ld", header=T)
 p1in <- read.delim("Tms_alignedcoords_P1.maf.inter.ld", header=T)
 p2in <- read.delim("Tms_alignedcoords_P2.maf.inter.ld", header=T)
+p2in <- read.delim("Tms.coord.P2.noutlie.maf.inter.ld", header=T)
+p1in$X <- NULL
 # changing the collumns names
 colnames(p1in) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 colnames(p2in) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
-
+colnames(p1in)
 
 # sex pop
 tce <- read.delim("Tce_alignedcoords.lg.maf.inter.ld", header=T)
+tce <- read.delim("Tce_random.inter.ld", header=T)
 colnames(tce) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 
 
@@ -811,7 +1027,7 @@ print(myplot)
 dev.off()
 
 ## reorder x axis labels
-clohi$inter2 <- factor(clohi$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
+tce$inter2 <- factor(tce$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
 				"lg9-lg9", "lg10-lg10", "lg11-lg11", "lg12-lg12", "lgX-lgX",
 				"lg1-lg2", "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6", "lg1-lg7", "lg1-lg8", "lg1-lg9",
 				"lg1-lg10", "lg1-lg11", "lg1-lg12", "lg1-lgX",
@@ -829,7 +1045,7 @@ clohi$inter2 <- factor(clohi$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", 
 				"lg10-lg11", "lg10-lg12", "lg10-lgX",
 				"lg11-lg12", "lg11-lgX",
 				"lg12-lgX"))
-p2in$inter2 <- factor(p2in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
+p1in$inter2 <- factor(p1in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
 				"lg9-lg9", "lg10-lg10", "lg11-lg11", "lg12-lg12", "lgX-lgX",
 				"lg1-lg2", "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6", "lg1-lg7", "lg1-lg8", "lg1-lg9",
 				"lg1-lg10", "lg1-lg11", "lg1-lg12", "lg1-lgX",
@@ -853,33 +1069,42 @@ p2in$inter2 <- factor(p2in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "l
 #sub_p2in <- p1in[!(p2in$R2>=1),]
 
 # make error bars
-errbar_lims = group_by(clohi, inter2) %>%
+errbar_lims = group_by(tce, inter2) %>%
 summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
 upper=mean+(2*se), lower=mean-(2*se))
 
-errbar_lims = group_by(p2in, inter2) %>%
-summarize(mea.ptn=mean(R2), se=sd(R2)/sqrt(n()),
+errbar_lims = group_by(p1in, inter2) %>%
+summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
 upper=mean+(2*se), lower=mean-(2*se))
 
 
 ##### final commands to make the main plot: all pairwise comparisons
 mean_se_violin =  ggplot() + 
-	geom_violin(data=clohi, aes(x= inter2, y = R2, colour=inter2)) +
-	geom_point(data=clohi, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
+	geom_violin(data=tce, aes(x= inter2, y = R2, colour=inter2)) +
+	geom_point(data=tce, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
 	geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
 	theme_minimal() +
-	theme(axis.text.x = element_text(angle = 45, size=4,  hjust=1), legend.position = "none")
+	theme(axis.text.x = element_text(angle = 45, size=10,  hjust=1), legend.position = "none")
 
 mean_se_violin =  ggplot() + 
-	geom_violin(data=p2in, aes(x= inter2, y = R2, colour=inter2)) +
-	geom_point(data=p2in, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
+	geom_violin(data=p1in, aes(x= inter2, y = R2, colour=inter2)) +
+	geom_point(data=p1in, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
 	geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
 	theme_minimal() +
-	theme(axis.text.x = element_text(angle = 45, size=4,  hjust=1), legend.position = "none")
+	theme(axis.text.x = element_text(angle = 45, size=10,  hjust=1), legend.position = "none")
+
+mean_se_boxplot = ggplot() + 
+  geom_boxplot(data=tce, aes(x= inter2, y = R2, colour=inter2),outlier.colour="azure3", outlier.shape=16,
+               outlier.size=0.2, notch=FALSE) +
+  geom_point(data=tce, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
+  geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, size=4,  hjust=1), legend.position = "none")
+
 	
-	
-png("clohi.ld_coords.png", width = 480, height = 480)
+png("Tce_random_ld_coords-boxplot.png", width = 480, height = 480)
 print(mean_se_violin)
+print(mean_se_boxplot)
 dev.off()
 
 ############################
@@ -904,6 +1129,9 @@ p2dec <- read.delim("Tge.P2.coord.decay.ld", header=T)
 
 p1dec <- read.delim("Tms.P1.coord.decay.ld", header=T)
 p2dec <- read.delim("Tms.P2.coord.decay.ld", header=T)
+p2dec <- read.delim("Tms.coord.P2.noutlie.maf.decay.ld", header=T)
+
+
 
 ### simulations
 # cloning - no recombination
@@ -951,7 +1179,7 @@ tce$distance <- tce$BP_B - tce$BP_A
 library("gridExtra")
 
 
-sub1 <- p1dec[(p1dec$CHR_A=="lg1"),]
+sub1 <- p2dec[(p2dec$CHR_A=="lg1"),]
 plot1<-ggplot(sub1, aes(distance, R2)) +
   geom_point() +
 #  facet_grid(CHR_A ~ .) +
@@ -959,7 +1187,7 @@ plot1<-ggplot(sub1, aes(distance, R2)) +
   ggtitle("lg1")+
   theme(axis.text = element_text(size=6))
 
-sub2 <- p1dec[(p1dec$CHR_A=="lg2"),]
+sub2 <- p2dec[(p2dec$CHR_A=="lg2"),]
 plot2<-ggplot(sub2, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -967,7 +1195,7 @@ plot2<-ggplot(sub2, aes(distance, R2)) +
   ggtitle("lg2")+
   theme(axis.text = element_text(size=6))
 
-sub3 <- p1dec[(p1dec$CHR_A=="lg3"),]
+sub3 <- p2dec[(p2dec$CHR_A=="lg3"),]
 plot3<-ggplot(sub3, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -975,7 +1203,7 @@ plot3<-ggplot(sub3, aes(distance, R2)) +
   ggtitle("lg3")+
   theme(axis.text = element_text(size=6))
 
-sub4 <- p1dec[(p1dec$CHR_A=="lg4"),]
+sub4 <- p2dec[(p2dec$CHR_A=="lg4"),]
 plot4<-ggplot(sub4, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -983,7 +1211,7 @@ plot4<-ggplot(sub4, aes(distance, R2)) +
   ggtitle("lg4")+
   theme(axis.text = element_text(size=6))
 
-sub5 <- p1dec[(p1dec$CHR_A=="lg5"),]
+sub5 <- p2dec[(p2dec$CHR_A=="lg5"),]
 plot5<-ggplot(sub5, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -991,7 +1219,7 @@ plot5<-ggplot(sub5, aes(distance, R2)) +
   ggtitle("lg5")+
   theme(axis.text = element_text(size=6))
 
-sub6 <- p1dec[(p1dec$CHR_A=="lg6"),]
+sub6 <- p2dec[(p2dec$CHR_A=="lg6"),]
 plot6<-ggplot(sub6, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -999,7 +1227,7 @@ plot6<-ggplot(sub6, aes(distance, R2)) +
   ggtitle("lg6")+
   theme(axis.text = element_text(size=6))
 
-sub7 <- p1dec[(p1dec$CHR_A=="lg7"),]
+sub7 <- p2dec[(p2dec$CHR_A=="lg7"),]
 plot7<-ggplot(sub7, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -1007,7 +1235,7 @@ plot7<-ggplot(sub7, aes(distance, R2)) +
   ggtitle("lg7")+
   theme(axis.text = element_text(size=6))
 
-sub8 <- p1dec[(p1dec$CHR_A=="lg8"),]
+sub8 <- p2dec[(p2dec$CHR_A=="lg8"),]
 plot8<-ggplot(sub8, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -1015,7 +1243,7 @@ plot8<-ggplot(sub8, aes(distance, R2)) +
   ggtitle("lg8")+
   theme(axis.text = element_text(size=6))
 
-sub9 <- p1dec[(p1dec$CHR_A=="lg9"),]
+sub9 <- p2dec[(p2dec$CHR_A=="lg9"),]
 plot9<-ggplot(sub9, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -1023,7 +1251,7 @@ plot9<-ggplot(sub9, aes(distance, R2)) +
   ggtitle("lg9")+
   theme(axis.text = element_text(size=6))
 
-sub10 <- p1dec[(p1dec$CHR_A=="lg10"),]
+sub10 <- p2dec[(p2dec$CHR_A=="lg10"),]
 plot10<-ggplot(sub10, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -1031,7 +1259,7 @@ plot10<-ggplot(sub10, aes(distance, R2)) +
   ggtitle("lg10")+
   theme(axis.text = element_text(size=6))
 
-sub11 <- p1dec[(p1dec$CHR_A=="lg11"),]
+sub11 <- p2dec[(p2dec$CHR_A=="lg11"),]
 plot11<-ggplot(sub11, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -1039,7 +1267,7 @@ plot11<-ggplot(sub11, aes(distance, R2)) +
   ggtitle("lg11")+
   theme(axis.text = element_text(size=6))
 
-sub12 <- p1dec[(p1dec$CHR_A=="lg12"),]
+sub12 <- p2dec[(p2dec$CHR_A=="lg12"),]
 plot12<-ggplot(sub12, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -1047,7 +1275,7 @@ plot12<-ggplot(sub12, aes(distance, R2)) +
   ggtitle("lg12")+
   theme(axis.text = element_text(size=6))
 
-subX <- p1dec[(p1dec$CHR_A=="lgX"),]
+subX <- p2dec[(p2dec$CHR_A=="lgX"),]
 plotX<-ggplot(subX, aes(distance, R2)) +
   geom_point() +
   #  facet_grid(CHR_A ~ .) +
@@ -1055,8 +1283,8 @@ plotX<-ggplot(subX, aes(distance, R2)) +
   ggtitle("lgX") +
   theme(axis.text = element_text(size=6))
 
-pdf("Tms_pop1_LDdecay.pdf", width = 10, paper = 'a4')
-png("Tms_pop1_LDdecay.png", width = 480, height = 480)
+pdf("Tms_pop2_noutlie_LDdecay.pdf", width = 10, paper = 'a4')
+png("Tms_pop2_noutlie_LDdecay.png", width = 480, height = 480)
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8,
              plot9, plot10, plot11, plot12, plotX, ncol=4)
 

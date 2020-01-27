@@ -503,6 +503,32 @@ plink --vcf Tms.scaf.vcf --out Tms.scaf --make-bed --allow-extra-chr --recode
 # --allow-extra-chr is to allow weird CHROM names
 # this command will produce 8 files (.map, .nosex, .bed, .bim, .fam, .ped, .log)
 
+### recalculate LD in Monikensis P2 without the heterozygote outliers
+# Tms1_P2
+# Tms17_P2
+# Tms19_P2
+# Tms22_P2
+
+/mnt/c/Users/User/Softwares/vcflib/bin/vcfremovesamples Tms_alignedcoords_P2.vcf Tms1_P2 Tms17_P2 Tms19_P2 Tms22_P2 > Tms_alignedcoords_P2.noutliers.vcf
+
+./plink --vcf Tms_alignedcoords_P2.noutliers.vcf --out Tms.coord.P2.noutlie --make-bed --allow-extra-chr --recode
+
+## calculate the LD
+./plink.exe --bfile Tms.coord.P2.noutlie --maf 0.2 --recode --out Tms.coord.P2.noutlie.maf --allow-extra-chr --make-bed
+./plink.exe --file Tms.coord.P2.noutlie.maf --r2 inter-chr --ld-window-r2 0 --allow-extra-chr --out Tms.coord.P2.noutlie.maf.inter
+./plink.exe --bfile Tms.coord.P2.noutlie.maf --r2 --ld-window-r2 0 --ld-window 999999 --ld-window-kb 8000 --out Tms.coord.P2.noutlie.maf.decay --allow-extra-chr
+
+
+
+
+
+./plink.exe --bfile Tms.coord.P2.noutlie --r2 --ld-window-r2 0 --ld-window 999999 --ld-window-kb 8000 --out Tms.coord.P2.noutlie.
+### LD decay
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tms.coord.P2.noutlie.maf --r2 --ld-window-r2 0 --ld-window 999999 --ld-window-kb 8000 --out Tms.P2.coord.decay --allow-extra-chr
+
+
+
+
 
 
 ######################################################################

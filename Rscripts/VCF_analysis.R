@@ -24,9 +24,222 @@ library(ggmap)
 #install.packages("ape", dependencies = TRUE)
 #install.packages("stringi")
 
+
+
+### Tms ###
+### Tge ###
+#### set working directory
+setwd("C:/Users/User/Dropbox/Timema_cryptic_geneflow/vcfR")
+## Tge
+tgevcf <- read.vcfR( "C:/Users/User/Dropbox/Timema_cryptic_geneflow/mapping_scaf_coordinates_new/test_plink/allinds/Tge_alignedcoords.vcf", verbose = FALSE )
+tge <- vcfR2genind(tgevcf)
+## Tms
+tmsvcf <- read.vcfR( "C:/Users/User/Dropbox/Timema_cryptic_geneflow/mapping_scaf_coordinates_new/test_plink/allinds/Tms_alignedcoords.vcf", verbose = FALSE )
+tms <- vcfR2genind(tmsvcf)
+## Tce
+tcevcf <- read.vcfR( "C:/Users/User/Dropbox/Timema_cryptic_geneflow/simulations/sexual_species/Tce/Tce_alignedcoords.vcf", verbose = FALSE )
+## clono
+clovcf <- read.vcfR( "C:/Users/User/Dropbox/Timema_cryptic_geneflow/simulations/cloning-recomb-3levels/no-recomb/cloning-norecomb.lg.vcf", verbose = FALSE )
+
+## see individual names
+indNames(tms)
+## I had already excluded low DP samples, but Gepop2.6 is also very low - I will exclude it here!
+# Gepop2.2
+# Gepop2.5
+# Gepop2.6
+# Tms13_P1
+# Tms18_P2
+
+indNames(tms)
+Dat1 <- tge[indNames(tge) != "Gepop2.6"]
+tge <- Dat1[indNames(Dat1) != "Gepop2.5"]
+
+dat1 <- tms[indNames(tms) != "Tms13_P1"]
+tms <- dat1[indNames(dat1) != "Tms18_P2"]
+
+## set pop Tge
+rep(c("Pop1", "Pop2"), times=c(23,20))
+tge@pop <- as.factor(rep(c("Pop1", "Pop2"), times=c(23,20)))
+tge@pop
+
+## set pop Tms
+rep(c("Pop1", "Pop2"), times=c(22,22))
+tms@pop <- as.factor(rep(c("Pop1", "Pop2"), times=c(22,22)))
+tms@pop
+
+##### PCoA - ADEGENET #######
+## make PCA
+x.cows <- tab(tms, freq=TRUE, NA.method="mean")
+pca.cows <- dudi.pca(x.cows, center=TRUE, scale=TRUE)
+
+# 5  Multivariate analyses5.1  Principal Component Analysis (PCA)
+#Principal Component Analysis (PCA) is the amongst the most common multivariate
+# analysesused in genetics.  Running a PCA ongenindobject is straightforward. 
+# One needs to firstextract allelic data (as frequencies) and replace missing values 
+# using the accessortabandthen use the PCA procedure (dudi.pca).  Let us use this
+# approach on themicrobovdata.
+# Let us first load the data:
+# data(microbov)
+# x.cows <- tab(microbov, freq=TRUE, NA.method="mean")
+# pca.cows <- dudi.pca(x.cows, center=TRUE, scale=FALSE)
+#The function dudi.pca displays a barplot of eigenvalues (thescreeplot) and asks 
+# for a numberof retained principal components.  In general,  eigenvalues represent
+# the amount of geneticdiversity  -  as  measured  by  the  multivariate  method  being
+# used  -  represented  by  each principal component (PC). Here,  each eigenvalue is the
+# variance of the corresponding PC.A sharp decrease in the eigenvalues is usually
+# indicative of the boundaries between relevantstructures and random noise. 
+# Here, how many axes would you retain?
+# Tge = 10
+# Tms = 20
+
+s.label(pca.cows$li)
+s.class(pca.cows$li, fac=pop(tge), col=funky(15))
+
+# Tge
+indNames(tge)
+fac.score <- factor(rep(c("Pop1", "Pop2"), times=c(23,20)))
+# Tms
+indNames(tge)
+fac.score <- factor(rep(c("Pop1", "Pop2"), times=c(22,22)))
+
+
+png("Tms_PCA.png", width = 580, height = 500)
+par(mfrow = c(1,1))
+s.class(pca.cows$li, fac.score,
+        col=transp(funky(2),1),
+       # grid = FALSE,
+       possub = "topright",
+       sub = "PCA - Tms",
+        cellipse= TRUE,
+        axesell=TRUE, cstar=1, cpoint=3,
+        addaxes=TRUE,
+        ylim = c(-300,150)
+        )
+
+dev.off()
+png("Tms_PCA-eig.png", width = 580, height = 500)
+add.scatter.eig(pca.cows$eig[1:20], xax=1, yax=2,
+                ratio=.2, posi="bottomright")
+dev.off()
+
+
+#B15928
+pop(tge)
+temp <- as.integer(pop(tge))
+myCol <- transp(funky(2),.6)[temp]
+myPch <- c(15,17)[temp]
+plot(pca.cows$li[1:2], col=myCol, cex=3, pch=myPch, xlim =c(-180, 170), ylim=c(-80, 60))
+
+
+### calculate genetic distances
+library(poppr)
+## I have to use a genind obj
+# Tmsnei <- nei.dist(Tms, warning = TRUE)
+## calculate euclidean distance
+D <- dist(tab(tms))
+## put them in a tree
+library(ape)
+tre <- nj(D)
+par(xpd=TRUE)
+
+png("Tms_tree.png", width = 580, height = 500)
+temp <- as.integer(pop(tms))
+myCol <- transp(funky(2),.6)[temp]
+plot(tre, type="unrooted", edge.w=2, font =1, show.tip.label = FALSE)
+tiplabels(pch = 19, col = myCol, adj = 2.5, cex = 3)
+edgelabels(tex=round(tre$edge.length,1), bg=rgb(.8,.8,1,.8))
+dev.off()
+
+
+# Allele presence absencedata are extracted and NAs replaced usingtab:
+X <- tab(tge, NA.method="mean")
+pca1 <- dudi.pca(X,scannf=FALSE,scale=FALSE)
+temp <- as.integer(pop(tge))
+myCol <- transp(c("blue","red"),.7)[temp]
+myPch <- c(15,17)[temp]
+## basic plot
+pdf(file="PCA_Tms.pdf")
+pdf(file="PCA_Tms_labels.pdf")
+plot(pca1$li, col=myCol, cex=3, pch=myPch, xlim =c(-180, 170), ylim=c(-80, 60))
+dev.off()
+
+## use wordcloud for non-overlapping labels
+library(wordcloud)
+textplot(pca1$li[,1], pca1$li[,2], words=rownames(X), cex=0.7, new=FALSE)
+dev.off()
+
+
+### check eigenvalues and other PCA parameters.
+## I followed this tutorial: http://www.sthda.com/english/wiki/factoextra-r-package-easy-multivariate-data-analyses-and-elegant-visualization
+library(factoextra)
+pdf(file="Tms_pca_eig.pdf")
+fviz_eig(pca1)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #### ADEGENET
 
-### make a PCA plot
+### make a PCoA plot
+
+
+### calculate genetic distances
+library(poppr)
+## I have to use a genind obj
+# Tmsnei <- nei.dist(Tms, warning = TRUE)
+## calculate euclidean distance
+D <- dist(tab(tge))
+## put them in a tree
+library(ape)
+tre <- nj(D)
+par(xpd=TRUE)
+pdf(file="Tms_dist.pdf")
+pdf(file="Tms_dist_edgelab.pdf")
+plot(tre, type="unrooted", edge.w=2, font =1)
+dev.off()
+edgelabels(tex=round(tre$edge.length,1), bg=rgb(.8,.8,1,.8))
+
+
+## PCoA with the distances
+pco1 <- dudi.pco(D, scannf=FALSE,nf=2)
+s.label(pco1$li*1.1, clabel=0, pch=10)
+textplot(pco1$li[,1], pco1$li[,2], words=rownames(pco1$li),cex=0.8, new=FALSE, xpd=TRUE)
+title("Principal Coordinate Analysis\n-Tge-")
+
+
+
+
+
+
+
 
 Tms <- read.genepop("populations.snps.gen", quiet = TRUE)
 # Allele presence absencedata are extracted and NAs replaced usingtab:
@@ -50,6 +263,7 @@ dev.off()
 
 ### check eigenvalues and other PCA parameters.
 ## I followed this tutorial: http://www.sthda.com/english/wiki/factoextra-r-package-easy-multivariate-data-analyses-and-elegant-visualization
+install.packages("factoextra")
 library(factoextra)
 pdf(file="Tms_pca_eig.pdf")
 fviz_eig(pca1)

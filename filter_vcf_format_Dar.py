@@ -28,7 +28,7 @@ for opt, arg in opts:
     if opt in ("-h"):
         print("\n**** Help summary **** \n") 
         sys.exit(2)
-        
+ ## use        
     elif opt in ("-i"):
         vcf_filename = arg
     else:
@@ -39,9 +39,9 @@ for opt, arg in opts:
 N_odd_DP = 0
 vcf_data = open(vcf_filename)
 
-Sample_odd_DP=open("tms.trim3.scafs.oddDP.txt","w")
+Sample_odd_DP=open("tms.trim3.scafs.oddDP_onlyhet.txt","w")
 ratio_line = []
-ratio_table = open("tms.trim3.scafs.DPratio.txt","w")
+ratio_table = open("tms.trim3.scafs.DPratio_onlyhet.txt","w")
 # 
 # header = ("#CHROM",	"POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO", "FORMAT", "Tms8_P2",
 # 		  "Tms8_P1", "Tms6_P2", "Tms4_P2", "Tms4_P1", "Tms7_P1", "Tms2_P1", "Tms5_P1", "Tms22_P2",
@@ -76,6 +76,7 @@ for line in vcf_data:
 		line = line.rstrip("\n").split("\t")
 		#print(line)
 		format_vcf = line[8]
+		GT_index = format_vcf.split(":").index("GT")
 		AO_index = format_vcf.split(":").index("AO")
 		RO_index = format_vcf.split(":").index("RO")
 		DP_index = format_vcf.split(":").index("DP")
@@ -96,63 +97,75 @@ for line in vcf_data:
 			print("hello")
 			# print(sample)
 			# print(format_vcf)
-			sampAO = sample.split(":")[AO_index]
-			sampRO = sample.split(":")[RO_index]
-			sampDP = sample.split(":")[DP_index]
-			if INFO_index != None:
-				sampFT = sample.split(":")[INFO_index]
-				# print("sampFT:")
-				# print(sampFT)
-				if sampFT == "DP_8-200":
-					samplePASS = "FAIL"
-					ratio="NA"
-					# print("Filter is DP_8-200")
-				else:
-					samplePASS = "PASS"
-					# print("Filter is PASS")
-			# print(samplePASS)
-			# print(sampAO)
-			if samplePASS == "FAIL":
-				ratio = "NA"
-			else:
-				# print("BALLS")
-				try:
-					sampAO = int(sampAO)
-				except:
-					ratio="NA"
-				try:
-					sampRO = int(sampRO)
-				except:
-					ratio="NA"
-				if ratio != "NA":
-					if int(sampDP) == sampAO + sampRO:
-						if sampAO >= sampRO:
-							ratio = decimal.Decimal(sampRO)/decimal.Decimal(sampAO)
-						else:
-							ratio = decimal.Decimal(sampAO)/decimal.Decimal(sampRO)
-					else:
-						N_odd_DP = N_odd_DP + 1
-						Sample_odd_DP.write(str(line[0]) + "," + str(line[1]) +
-															"," + str(head[i]) + "\n")
+			sampGT = sample.split(":")[GT_index]
+## this is to select the ratio only for heterozygous positions
+			if sampGT in {"0/1", "0|1", "1/0", "1|0"}:
+				print("this is an het position")
+				sampAO = sample.split(":")[AO_index]
+				sampRO = sample.split(":")[RO_index]
+				sampDP = sample.split(":")[DP_index]
+
+				if INFO_index != None:
+					sampFT = sample.split(":")[INFO_index]
+					# print("sampFT:")
+					# print(sampFT)
+					if sampFT == "DP_8-200":
+						samplePASS = "FAIL"
 						ratio="NA"
-						# print("BAD")
-			# print(sampAO)
-			# print(sampRO)
-			# print(sampDP)
-			print(ratio)
-			ratio_line.append(ratio)
-		print(ratio_line)
-		output_ratio_line=line[0] + "," + line[1]
-		for item in ratio_line:
-			output_ratio_line = output_ratio_line + "," + str(item)
-			# if isinstance(item, decimal):
-			# 	output_ratio_line = output_ratio_line + "," + str(item)
-			# else:
-			# 	output_ratio_line = output_ratio_line + "," + str(item)
+						# print("Filter is DP_8-200")
+					else:
+						samplePASS = "PASS"
+						# print("Filter is PASS")
+				# print(samplePASS)
+				# print(sampAO)
+				if samplePASS == "FAIL":
+					ratio = "NA"
+				else:
+					# print("BALLS")
+					try:
+						sampAO = int(sampAO)
+					except:
+						ratio="NA"
+					try:
+						sampRO = int(sampRO)
+					except:
+						ratio="NA"
+					if ratio != "NA":
+						if int(sampDP) == sampAO + sampRO:
+							if sampAO >= sampRO:
+								ratio = decimal.Decimal(sampRO)/decimal.Decimal(sampAO)
+							else:
+								ratio = decimal.Decimal(sampAO)/decimal.Decimal(sampRO)
+						else:
+							N_odd_DP = N_odd_DP + 1
+							Sample_odd_DP.write(str(line[0]) + "," + str(line[1]) +
+																"," + str(head[i]) + "\n")
+							ratio="NA"
+							# print("BAD")
+				# print(sampAO)
+				# print(sampRO)
+				# print(sampDP)
+				print(ratio)
+				ratio_line.append(ratio)
+			else:
+				ratio="NA"
+				ratio_line.append(ratio)
+			
+			
+			
+			
+			print(ratio_line)
+			output_ratio_line=line[0] + "," + line[1]
+			for item in ratio_line:
+				output_ratio_line = output_ratio_line + "," + str(item)
+				# if isinstance(item, decimal):
+				# 	output_ratio_line = output_ratio_line + "," + str(item)
+				# else:
+				# 	output_ratio_line = output_ratio_line + "," + str(item)
 		output_ratio_line.lstrip(",")
 		ratio_table.write(output_ratio_line + "\n")
 		# ratio_table.write("\n".join(str(item) for item in ratio_line))
-print(type(ratio_line))
+#print(type(ratio_line))
 #print(N_odd_DP)
 #print(Sample_odd_DP)
 #print(ratio_table)
