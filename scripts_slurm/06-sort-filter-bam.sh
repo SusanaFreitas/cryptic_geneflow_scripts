@@ -6,15 +6,15 @@
 #
 #SBATCH --partition=long  ## options: normal(24h), long(10d)
 #
-#SBATCH --job-name=sort-bam
+#SBATCH --job-name=Tsisort-bam
 # memory
 #SBATCH --ntasks=1 ## no of tasks (or threads)
 #SBATCH --cpus-per-task=1 ## no of cores used per thread
 #SBATCH --mem-per-cpu=3G ## memory used per cpu (or core) in Mb
 # #SBATCH --time=23:00:00 # for this option I will use the default, which is 5 days
 # outputs
-#SBATCH --output=sort-bam.out
-#SBATCH --error=sort-bam.err
+#SBATCH --output=Tsisort-bam.out
+#SBATCH --error=Tsisort-bam.err
 #SBATCH --mail-user=susana.freitas@unil.ch
 #SBATCH --mail-type=ALL
 
@@ -26,16 +26,11 @@ module load UHTS/Analysis/samtools/1.4
 
 # convert individual sam to bam, sort and index
 for i in $(cat inds); do
-        samtools view -u -h $i-map2.sam | samtools sort -o $i-srt2.bam - ;
-        samtools view -b -h -F 0x100 -q 30 $i-srt2.bam | samtools sort -o $i-filtered2.bam - ;
-        samtools index $i-filtered2.bam;
+        samtools view -u -h $i-map.sam | samtools sort -o $i-srt.bam - ;
+        samtools view -b -h -F 0x100 -q 30 $i-srt.bam | samtools sort -o $i-filtered.bam - ;
+        samtools index $i-filtered.bam;
 done
 
-for i in $(cat inds); do
-        samtools view -u -h $i-map3.sam | samtools sort -o $i-srt3.bam - ;
-        samtools view -b -h -F 0x100 -q 30 $i-srt3.bam | samtools sort -o $i-filtered3.bam - ;
-        samtools index $i-filtered3.bam;
-done
 
 # -q INT Skip alignments with MAPQ smaller than INT [0]. 
 # -u Output uncompressed BAM. This option saves time spent on compression/decompression and is thus preferred when the output is piped to another samtools command
@@ -48,11 +43,9 @@ done
 
 # test quality of alignments
 for i in $(cat inds); do
-        samtools flagstat $i-filtered2.bam;
+        samtools flagstat $i-filtered.bam;
 done
-for i in $(cat inds); do
-        samtools flagstat $i-filtered3.bam;
-done
+
 
 module rm Bioinformatics/Software/vital-it
 module rm UHTS/Analysis/samtools/1.4

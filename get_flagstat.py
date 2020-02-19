@@ -1,14 +1,40 @@
+#! python
+
 ## python script to get flagstat output into a table
 # first column is the filename
+## usage > python get_flagstat.py -o outputfile.txt
 
+import sys
+import getopt
 import os
 import numpy as np
+
+try:
+	opts, args = getopt.getopt(sys.argv[1:], "o:h")
+except getopt.GetoptError:
+	print("Error getting options, Exiting")
+	sys.exit(2) ### close ofter error from try
+
+vcf_filename = None
+
+for opt, arg in opts:
+    if opt in ("-h"):
+        print("\n**** Help summary **** \n") 
+        sys.exit(2)
+ ## use        
+    elif opt in ("-o"):
+        outfile = arg
+    else:
+        print("i dont know")
+        sys.exit(2)
+headers = ("sample", "total", "secondary","supplementary", "duplicates", "mapped", "paired_in_sequencing", "read1", "read2", "properly_paired", "with_itself_and_mate_mapped", "singletons", "with_mate_mapped_different_chr", "with_mate_mapped_different_chr_Q")
 flagstat=[]
 # flagstat = open("flagstat_stats.txt", "w+")
 result=[]
 result1=[]
 lst_4_print=[]
-for filename in os.listdir('/home/susana/Dropbox/Timema_cryptic_geneflow/monikensis/non-trimmed/flagstat'):
+flagstat.append(headers)
+for filename in os.listdir('/home/susana/Dropbox/Timema_cryptic_geneflow/2_from_reads_to_vcf/douglasi/flagstat-map'):
 	if filename.endswith(".txt") or filename.endswith(".png"):
 		# print(os.path.join(directory, filename))
 		f = open(filename, 'a+')
@@ -41,27 +67,14 @@ for filename in os.listdir('/home/susana/Dropbox/Timema_cryptic_geneflow/moniken
 		continue
 
 # print(flagstat)
-flagsfile = open("flagstat_stats.txt", "w+")
+flagsfile = open(outfile, "w+")
 ## I need to add newlines into the file:
 for s in flagstat:
-	flagsfile.write("%s\n" % s)
-#flagsfile.write(str(flagstat))
+	flagsfile.write("\t".join(map(str,s)) + "\n")
 flagsfile.close()
 
+### finish the script
 
-## This is not over... we have to run some onliners on bash :(
-## maybe improve this script later on
-
-# to give \n in between the lines
-sed -i 's/\], \[/\n/g' flagstat_stats.txt 
-# tabs in between columns
-sed -i 's/, /\t/g' flagstat_stats.txt
-# remove all quotes
-sed -i "s/'//g" flagstat_stats.txt
-
-# remove square parenthesis
-sed -i 's/\[//g' flagstat_stats.txt
-# and
-sed -i 's/\]//g' flagstat_stats.txt
+print("A corrida acabou! Vito'ria, vito'ria, acabou-se a histo'ria!")
 
 ## DONE!

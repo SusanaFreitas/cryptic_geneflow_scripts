@@ -307,9 +307,15 @@ vcf3 <- read.vcfR("Tms.trim3.scafs.srt.vcf") #read in all data
 vcf2 <- read.vcfR("Tms.trim2.bial.vcf") #read in all data
 vcf <- read.vcfR("Tms.fb.bial.vcf") #read in all data
 vcf <- read.vcfR("Tms.trim3.scafs.srt.vcf")
+
 ## The ID column had to be empty - it was giving an error: "ID column with non unique values"
 ## to correct for that I put '.' in the ID column and used the function addID()
 vcf <- read.vcfR("Tms.trim3.scafs.srt.cor.vcf")
+
+vcf <- read.vcfR("Tsi.posvcflib.vcf")
+vcf <- read.vcfR("Tdi.posvcflib.vcf")
+vcf <- read.vcfR("Tge.posvcflib.vcf")
+vcf <- read.vcfR("Tms.trim3_posvcflib.vcf")
 
 
 
@@ -318,9 +324,14 @@ vcf@fix[1:10,1:5] #check
 vcf <- addID(vcf, sep = "_")
 ## read annotation file
 gff <- read.table("3_Tms_b3v08.max_arth_b2g_droso_b2g.gff", sep="\t", quote="")
+gff <- read.table("2_Tsi_b3v08.max_arth_b2g_droso_b2g.gff", sep="\t", quote="")
 
 ## read sequence file (this is very heavy!!)
 dna <- ape::read.dna("3_Tms_b3v08.fasta", format = "fasta")
+dna <- ape::read.dna("2_Tsi_b3v08.fasta", format = "fasta")
+
+
+
 
 grep -v '^#' Tms.trim3.scafs.srt.vcf > Tms.trim3.scafs.srt.table
 # awk -v b=4 -v e=55 'BEGIN{FS=OFS="\t"} {for (i=b;i<=e;i++) printf "%s%s", $i, (i<e ? OFS : ORS)}' Tms.trim3.scafs.srt.table | less -S 
@@ -336,6 +347,7 @@ rm firstcolumn
 
 ## plot statistics summed over entire VCF
 chrom <- create.chromR(name='Tms', vcf=vcf)
+chrom <- create.chromR(name='Tsi', vcf=vcf)
 #chrom2 <- create.chromR(name='Tms_t2', vcf=vcf2)
 #chrom3 <- create.chromR(name='Tms_t3', vcf=vcf3)
 
@@ -350,17 +362,19 @@ dpscaf <- extract.gt(vcf, element='DP', as.numeric=TRUE)
 
 
 par(mar=c(8,4,1,1))
-boxplot(dp3, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", cex=0.4, cex.axis=0.5)
+boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", cex=0.4, cex.axis=0.5)
 par(mar=c(8,4,1,1))
-boxplot(dpscaf, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", cex=0.4, cex.axis=0.5, ylim=c(0,300))
+boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", cex=0.4, cex.axis=0.5, ylim=c(0,300))
 abline(h=8, col="red")
 
 
 ###plot read depth distribution per individual
-pdf(file="Tms_readdepth.pdf")
-par(mar=c(8,4,1,1))
-boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", las=2, cex=0.4, cex.axis=0.5, ylim=c(0,50))
+png(file="Tge_readdepth.png", width = 1000, height = 800)
+par(mar=c(4,4,1,1))
+boxplot(dp, las=3, col=c("#C0C0C0", "#808080"), ylab="Read Depth (DP)", cex=0.4, cex.axis=0.5,
+       ylim=c(0,50))
 abline(h=8, col="red")
+abline(h=5, col="yellow")
 dev.off()
 
 

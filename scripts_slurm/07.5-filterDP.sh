@@ -25,41 +25,28 @@
 #SBATCH --mail-user=susana.freitas@unil.ch
 #SBATCH --mail-type=ALL
 
-
+module add Bioinformatics/Software/vital-it
+module load UHTS/Analysis/GenomeAnalysisTK/4.1.0.0
 ### fasta files have to be indexed first
 ## with samtools faidx
 #samtools faidx 3_Tce_b3v08.fasta
 #samtools faidx 2_Tcm_b3v08.fasta
 
 ## and picard tools dict
-picard-tools CreateSequenceDictionary REFERENCE=3_Tce_b3v08.fasta OUTPUT=3_Tce_b3v08.dict
-picard-tools CreateSequenceDictionary REFERENCE=3_Tcm_b3v08.fasta OUTPUT=3_Tcm_b3v08.dict
-
-GenomeAnalysisTK VariantFiltration \
-	-R 3_Tce_b3v08.fasta \
-	-V Tce1.fb.vcf \
-	--genotype-filter-expression 'DP<8||DP>200' \
-	--genotype-filter-name 'DP_8-200' \
-	--output Tce_DPfilter.vcf
+#picard-tools CreateSequenceDictionary REFERENCE=3_Tce_b3v08.fasta OUTPUT=3_Tce_b3v08.dict
+#picard-tools CreateSequenceDictionary REFERENCE=3_Tcm_b3v08.fasta OUTPUT=3_Tcm_b3v08.dict
 
 GenomeAnalysisTK VariantFiltration\
-	-R 2_Tcm_b3v08.fasta\
-	-V Tcm1.fb.vcf\
-	--genotype-filter-expression 'DP<8||DP>200'\
-	--genotype-filter-name 'DP_8-200'\
-	--output Tcm_DPfilter.vcf
+        -R 1_Tdi_b3v08.fasta\
+        -V Tdi.fb.vcf --genotype-filter-expression "DP<8||DP>200"\
+        --genotype-filter-name "DP_8-200"\
+        --set-filtered-genotype-to-no-call\
+        --output Tdi.DPfilt.vcf
 
 module rm UHTS/Analysis/GenomeAnalysisTK/4.1.0.0
-module rm UHTS/Analysis/samtools/1.8
-module rm UHTS/Analysis/picard-tools/2.9.0
-
+module rm Bioinformatics/Software/vital-it
 
 ## OPTIONS:
 ## --set-filtered-genotype-to-no-call : used this to set the filtered genotypes (the ones that less than 8 > DP > 200)
 ## to ./.
 ## https://gatkforums.broadinstitute.org/gatk/discussion/7577/removing-variants-based-on-the-format-field
-
-module rm UHTS/Analysis/samtools/1.8
-module rm UHTS/Analysis/GenomeAnalysisTK/4.1.0.0
-module rm UHTS/Analysis/picard-tools/2.9.0
-module rm Bioinformatics/Software/vital-it

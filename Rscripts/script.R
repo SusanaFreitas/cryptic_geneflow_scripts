@@ -1507,3 +1507,78 @@ dev.off()
 
 
 
+#############################################################################################
+######################## Calculate clonal diversity with poppr ##############################
+#############################################################################################
+
+[ cd /home/susana/Dropbox/Timema_cryptic_geneflow/5_analyses/poppr_clonaldiversity ]
+
+library(vcfR)
+library(adegenet)
+library(adegraphics)
+library(pegas)
+library(StAMPP)
+library(lattice)
+library(gplots)
+library(ape)
+library(ggmap)
+library(poppr)
+
+## upload vcf files
+Tms2 <- read.vcfR( "Tms_alignedcoords_P2.vcf", verbose = FALSE )
+Tge1 <- read.vcfR( "Tge_alignedcoords_P1.vcf", verbose = FALSE )
+Tge <- read.vcfR( "Tge_alignedcoords.vcf", verbose = FALSE )
+Tms <- read.vcfR( "Tms_alignedcoords.vcf", verbose = FALSE )
+## convert in genind (adegenet)
+tms2 <- vcfR2genind(Tms2)
+tge1 <- vcfR2genind(Tge1)
+tms <- vcfR2genind(Tms)
+tge <- vcfR2genind(Tge)
+
+## add pop name to genind objects
+#check no of inds
+indNames(tms)
+ [1] "Tms10_P2" "Tms11_P2" "Tms12_P2" "Tms13_P2" "Tms14_P2" "Tms15_P2"
+ [7] "Tms16_P2" "Tms17_P2" "Tms18_P2" "Tms19_P2" "Tms1_P2"  "Tms20_P2"
+[13] "Tms21_P2" "Tms22_P2" "Tms23_P2" "Tms2_P2"  "Tms3_P2"  "Tms4_P2" 
+[19] "Tms5_P2"  "Tms6_P2"  "Tms7_P2"  "Tms8_P2"  "Tms9_P2"
+
+## main species
+pop(tms) <- rep(c("Pop1", "Pop2"), c(23, 23))
+pop(tge) <- rep(c("Pop1", "Pop2"), c(23, 21))
+
+## pop2 Tms
+pop(tms2) <- rep("Pop2",23)
+pop(tms2)
+ 
+
+### convert gening to genclon (to be used in poppr)
+clo_tge1 <- as.genclone(tge1)
+clo_tge1
+clo_tms2 <- as.genclone(tms2)
+clo_tms2
+
+clo_tge <- as.genclone(tge)
+clo_tms <- as.genclone(tms)
+mll(tms2)
+mll(tge1)
+
+
+### define a threshold to estimate multilocus genotypes
+
+## estimate genetic distances
+library("phangorn")
+library("ape")
+raw_dist <- function(x){
+  dist(genind2df(x, usepop = FALSE))
+}
+(xdis <- raw_dist(clo_tge))
+plot.phylo(upgma(xdis))
+
+mlg.filter(clo_tge, distance = xdis) <- 1 + .Machine$double.eps^0.5
+clo_tge
+
+mlg.filter(clo_tge, distance = xdis, threshold = 1, stats = c("mlg", "thresholds"))
+
+CONTINUENTHIS
+https://cran.r-project.org/web/packages/poppr/vignettes/mlg.html
