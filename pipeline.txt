@@ -36,23 +36,6 @@ library("ggplot2", lib.loc="/users/sfreitas1/R")
 6) Alignment - BWA
 	script: 05-bwamem.sh
 
-gunzip 1_Tdi_b3v08.fasta.gz
-bwa index 1_Tdi_b3v08.fasta
-for i in $(cat inds); do
-        bwa mem -t 4 -M -R "@RG\tID:$i\tSM:$i" 1_Tdi_b3v08.fasta $i-trim3.fq > $i-map.sam
-        echo $i
-done
-
-
-Alignment : BWA better than bowtie (that leaves mores reads out, but test which is best)
-	script: 05-mapreads.sh
-
-
-	helpful oneliners:
-	- repeat the same line 88 times in a file
-while read line; do for i in {1..88}; do echo "$line"; done; done < inds.end > file
-
-
 6) SAMTOOLS: sort, filter only aligned reads and index samples (read groups are added during the bwa alignment)
 	script: 06-sortfilter.sh
 
@@ -72,6 +55,7 @@ Call SNPs
 ## I will also count the number of reads per position, so that I can decide an appropriate DP cutoff.
 
 8.1) FILTER BY 8 < DP < 200
+	8.1.2) Resorted Tms bam files were filtered with more conservative parameters: 8 < DP < 100
 
 8.2) FILTER BY QUAL > 30
 
@@ -82,7 +66,7 @@ Call SNPs
 8.5) FILTER BY allelic no (keep only SNPs)
 
 8.6) Select only SNPs that fall into the overlap between aligned scaffolds with Nosil's genome - these are the SNPs that have lg coordinates and we can use to calculate LD decay
-
+python3 vcfmerge_scafs_lg.py
 
 
 
@@ -144,6 +128,26 @@ done
 # since it was the most conservative, without losing many SNPs
 # and I would rather have less SNPs, but correct.
 
+
+############################################################################
+########################## 6) mapping with BWA #############################
+############################################################################
+
+gunzip 1_Tdi_b3v08.fasta.gz
+bwa index 1_Tdi_b3v08.fasta
+for i in $(cat inds); do
+        bwa mem -t 4 -M -R "@RG\tID:$i\tSM:$i" 1_Tdi_b3v08.fasta $i-trim3.fq > $i-map.sam
+        echo $i
+done
+
+
+Alignment : BWA better than bowtie (that leaves mores reads out, but test which is best)
+	script: 05-mapreads.sh
+
+
+	helpful oneliners:
+	- repeat the same line 88 times in a file
+while read line; do for i in {1..88}; do echo "$line"; done; done < inds.end > file
 
 
 #########################################################################
@@ -294,6 +298,7 @@ eval $alprim -kg Tms.QUALpy.vcf > Tms.fb_posvcflib.vcf
 eval $alprim -kg Tms.trim2.QUALpy.vcf > Tms.trim2_posvcflib.vcf
 eval $alprim -kg Tms.trim3.QUALpy.vcf > Tms.trim3_posvcflib.vcf
 
+
 ## command line: Tge
 vcflib vcfallelicprimitives -kg Tge.trim2-test.py.out.vcf > Tge.trim2-test_posvcflib.vcf
 vcflib vcfallelicprimitives -kg Tge.trim2.py.out.vcf > Tge.trim2_posvcflib.vcf
@@ -326,6 +331,22 @@ vcftools --recode --recode-INFO-all --vcf Tge.stacks.DP_filter.vcf --max-missing
 
 vcftools --recode --recode-INFO-all --vcf Tsi.posvcflib.vcf --max-missing 0.75 --out Tsi.missfilt
 vcftools --recode --recode-INFO-all --vcf Tdi.posvcflib.vcf --max-missing 0.75 --out Tdi.missfilt
+
+## Tge
+# sample names: Gepop1.1, Gepop1.2, Gepop1.3, Gepop1.4, Gepop1.5, Gepop1.6, Gepop1.7, Gepop1.8, Gepop1.9,
+# Gepop1.10, Gepop1.11, Gepop1.12, Gepop1.13, Gepop1.14, Gepop1.15, Gepop1.16, Gepop1.17, Gepop1.18, Gepop1.19,
+# Gepop1.20, Gepop1.21, Gepop1.22, Gepop1.23, Gepop2.1, Gepop2.2, Gepop2.3, Gepop2.4, Gepop2.5, Gepop2.6, Gepop2.7,
+# Gepop2.8, Gepop2.9, Gepop2.10, Gepop2.11, Gepop2.12, Gepop2.13, Gepop2.14, Gepop2.15, Gepop2.16, Gepop2.17, Gepop2.18,
+# Gepop2.19, Gepop2.20, Gepop2.21, Gepop2.22, Gepop2.23
+
+
+
+
+
+
+
+
+
 
 
 
@@ -452,6 +473,50 @@ python3 H_genome_alignment/MUMmer_scfs_block_alignment.py 4_Tbi 1> data/4_Tbi/re
 # 3. you write all the paths relative and therefore the same script will work both on mine and your computer.
 
 
+## Them, to filter only positions that are within the anchored scaffolds, use home made script (by Susaninha!!): filter_Mummer_snps.py
+# Usage:
+python3 filter_Mummer_snps.py -h
+
+###########################################
+######### remove all repeated POS #########
+###########################################
+
+This script will give you duplicated positions. I don't know how this happened, so I will eliminate them
+
+### Tms ###
+# Tms.resort_coords.vcf
+grep '^#' Tms.resort_coords.vcf > header
+grep -v '^#' Tms.resort_coords.vcf > table
+
+## split into several files according to column #1
+awk -F'\t' '{print > $1".txt"}' table
+
+# remove duplicated POS lines
+for file in lg*.txt; do
+awk '!a[$2]++' $file > $file.uniq;
+done
+
+# concatenate header and all uniq lgs
+cat header lg*txt.uniq > test
+
+### Tge ###
+# Tge_alignedcoords.vcf
+grep '^#' Tge_alignedcoords.vcf > header
+grep -v '^#' Tge_alignedcoords.vcf > table
+
+## split into several files according to column #1
+awk -F'\t' '{print > $1".txt"}' table
+
+# remove duplicated POS lines
+for file in lg*.txt; do
+awk '!a[$2]++' $file > $file.uniq;
+done
+
+# concatenate header and all uniq lgs
+cat header lg*txt.uniq > Tge_alignedcoords_uniq.vcf
+
+## get only the GT
+vcftools --vcf Tge_P1_coords.uniq.vcf --extract-FORMAT-info GT --out TgeP1
 
 
 
@@ -473,14 +538,6 @@ python3 H_genome_alignment/MUMmer_scfs_block_alignment.py 4_Tbi 1> data/4_Tbi/re
 ## More details are here:
 ## https://github.com/AsexGenomeEvol/timema_assembly/tree/master/H_genome_alignment
 
-## I will discard the scafs that do not have a match
-## in R:
-# merge scaf list with vcf
-test <- merge(tms, scaf, by='scafname')
-# reorder and sort columns
-tmscr <- test[,c(58,2:55)]
-tmscr.srt <- tmscr[with(tmscr, order(lg, POS)), ]
-
 ## Use plink to calculate LD in two ways:
 #### a) with all inds (from both pops) together
 #### b) with each pop separated
@@ -490,9 +547,33 @@ tmscr.srt <- tmscr[with(tmscr, order(lg, POS)), ]
 /mnt/c/Users/User/Softwares/vcflib/bin/vcfremovesamples
 /mnt/c/Users/User/Softwares/vcflib/bin/vcfstats
 
-/mnt/c/Users/User/Softwares/vcflib/bin/vcfremovesamples Tms.scaf.vcf Tms9_P1 Tms8_P1 Tms6_P1 Tms22_P1 Tms4_P1 Tms20_P1 Tms2_P1 Tms14_P1 Tms12_P1 Tms11_P1 Tms3_P1 Tms10_P1 Tms5_P1 Tms23_P1 Tms13_P1 Tms7_P1 Tms21_P1 Tms1_P1 Tms15_P1 Tms16_P1 Tms17_P1 Tms19_P1 Tms18_P1 > Tms.scaf.P2.vcf
+################# Tge #################
 
-/mnt/c/Users/User/Softwares/vcflib/bin/vcfremovesamples Tms.scaf.vcf Tms9_P2 Tms8_P2 Tms6_P2 Tms22_P2 Tms4_P2 Tms20_P2 Tms2_P2 Tms14_P2 Tms12_P2 Tms11_P2 Tms3_P2 Tms10_P2 Tms5_P2 Tms23_P2 Tms13_P2 Tms7_P2 Tms21_P2 Tms1_P2 Tms15_P2 Tms16_P2 Tms17_P2 Tms19_P2 Tms18_P2 > Tms.scaf.P1.vcf
+## low DP samples: to be removed
+Gepop2.2
+Gepop2.5
+Gepop2.6
+Gepop1.17
+Gepop1.11
+Gepop1.3
+
+vcflib vcfremovesamples Tge_alignedcoords_uniq.vcf Gepop1.1 Gepop1.2 Gepop1.3 Gepop1.4 Gepop1.5 Gepop1.6 Gepop1.7 Gepop1.8 \
+	Gepop1.9 Gepop1.10 Gepop1.11 Gepop1.12 Gepop1.13 Gepop1.14  Gepop1.15 Gepop1.16 Gepop1.17 Gepop1.18 Gepop1.19 \
+	Gepop1.20 Gepop1.21 Gepop1.22 Gepop1.23 Gepop2.2 Gepop2.5 Gepop2.6 > Tge_P2_coords.uniq.vcf
+
+vcflib vcfremovesamples Tge_alignedcoords_uniq.vcf Gepop2.1 Gepop2.2 Gepop2.3 Gepop2.4 Gepop2.5 Gepop2.6 Gepop2.7 Gepop2.8 \
+	Gepop2.9 Gepop2.10 Gepop2.11 Gepop2.12 Gepop2.13 Gepop2.14 Gepop2.15 Gepop2.16 Gepop2.17 Gepop2.18 Gepop2.19 \
+	Gepop2.20 Gepop2.21 Gepop2.22 Gepop2.23 Gepop1.17 Gepop1.11 Gepop1.3 > Tge_P1_coords.uniq.vcf
+
+################# Tms #################
+
+vcflib vcfremovesamples Tms.resort_coords.uniq.vcf Tms9_P1 Tms8_P1 Tms6_P1 Tms22_P1 Tms4_P1 Tms20_P1 Tms2_P1 Tms14_P1 Tms12_P1 \
+	Tms11_P1 Tms3_P1 Tms10_P1 Tms5_P1 Tms23_P1 Tms13_P1 Tms7_P1 Tms21_P1 Tms1_P1 Tms15_P1 Tms16_P1 Tms17_P1 Tms19_P1 \
+	Tms18_P1 Tms18_P2 > Tms_P2_resort_coords.uniq.vcf
+
+vcflib vcfremovesamples Tms.resort_coords.uniq.vcf Tms9_P2 Tms8_P2 Tms6_P2 Tms22_P2 Tms4_P2 Tms20_P2 Tms2_P2 Tms14_P2 Tms12_P2 \
+	Tms11_P2 Tms3_P2 Tms10_P2 Tms5_P2 Tms23_P2 Tms13_P2 Tms7_P2 Tms21_P2 Tms1_P2 Tms15_P2 Tms16_P2 Tms17_P2 Tms19_P2 \
+	Tms18_P2 Tms17_P1 > Tms_P1_resort_coords.uniq.vcf
 
 ## or use vcftools on wally
 module add Bioinformatics/Software/vital-it
@@ -521,6 +602,7 @@ plink --vcf Tms.scaf.vcf --out Tms.scaf --make-bed --allow-extra-chr --recode
 # Tms19_P2
 # Tms22_P2
 
+vcflib vcfremovesamples Tms.resort_coords_P2.vcf Tms1_P2 Tms17_P2 Tms19_P2 Tms22_P2 > Tms.resort_P2.noutliers.vcf
 /mnt/c/Users/User/Softwares/vcflib/bin/vcfremovesamples Tms_alignedcoords_P2.vcf Tms1_P2 Tms17_P2 Tms19_P2 Tms22_P2 > Tms_alignedcoords_P2.noutliers.vcf
 
 ./plink --vcf Tms_alignedcoords_P2.noutliers.vcf --out Tms.coord.P2.noutlie --make-bed --allow-extra-chr --recode
@@ -1035,7 +1117,9 @@ SLIM is faster (and gives more or less same results than sfs_code, except when w
 This option allows you to simulate<nloci>. The first locus will have length <L1>. You can stop here to set all loci to the same length. Otherwise, you have two options. You can specify each of <L2>...<Lnloci> to set the lengths of each locus, or if you have a repeating pattern (e.g.a shortlocus followed by a long one) you can specify a subset of lengths followed by the character ‘R’. Forexample, if you want to simulate 4 loci, with lengths (500bp, 1kb, 500bp, 1kb), then you could useeither of the following commands.Ex. 4.$ ./sfscode 1 1 -L 4 500 1000 500 1000$ ./sfscode 1 1 -L 4 500 1000 R
 
 
-
+#############################################################################################################
+########################################  SIMULATIONS - Slim  ###############################################
+#############################################################################################################
 
 
 
@@ -1105,7 +1189,76 @@ initialize() {
 ./slim selfing-recomb-low.txt > selfing-recomb-low
 ./slim selfing-recomb-high.txt > selfing-recomb-high
 
-#
+
+
+#############################################################################################################
+####################################  Identity By Descent  -  IBD  ##########################################
+#############################################################################################################
+
+cd /home/susana/Dropbox/Timema_cryptic_geneflow/5_analyses/IBS
+
+######## Calculating the pairwise IBS metrics (--genome) ########
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P1.maf  --allow-extra-chr --genome  --out TmsRS_P1.maf.ibs
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P2.maf  --allow-extra-chr  --genome  --out TmsRS_P2.maf.ibs
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P1.maf  --allow-extra-chr  --genome  --out Tge_alignedcoords_P1.maf.ibs
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P2.maf  --allow-extra-chr  --genome  --out Tge_alignedcoords_P2.maf.ibs
+
+
+######## Performing an IBS clustering analysis (--cluster) ########
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P1.maf --allow-extra-chr --read-genome TmsRS_P1.maf.ibs.genome  --out TmsRS_P1.maf.ibs2 --cluster
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P2.maf --allow-extra-chr --read-genome TmsRS_P2.maf.ibs.genome  --out TmsRS_P2.maf.ibs2 --cluster
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P1.maf --allow-extra-chr --read-genome Tge_alignedcoords_P1.maf.ibs.genome  --out Tge_alignedcoords_P1.maf.ibs2 --cluster
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P2.maf --allow-extra-chr --read-genome Tge_alignedcoords_P2.maf.ibs.genome  --out Tge_alignedcoords_P2.maf.ibs2 --cluster
+
+
+######## Performing an IBS clustering analysis with two constraints (--cluster --ppc --cc) ########
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P1.maf --allow-extra-chr  --read-genome TmsRS_P1.maf.ibs.genome  --out TmsRS_P1.maf.ibs3 --cluster --ppc 0.01 --cc
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P2.maf --allow-extra-chr --read-genome TmsRS_P2.maf.ibs.genome  --out TmsRS_P2.maf.ibs3 --cluster --ppc 0.01 --cc
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P1.maf --allow-extra-chr --read-genome Tge_alignedcoords_P1.maf.ibs.genome  --out Tge_alignedcoords_P1.maf.ibs3 --cluster --ppc 0.01 --cc
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P2.maf --allow-extra-chr --read-genome Tge_alignedcoords_P2.maf.ibs.genome  --out Tge_alignedcoords_P2.maf.ibs3 --cluster --ppc 0.01 --cc
+
+
+######## Performing an IBS similarity matrix (--cluster --matrix) ########
+## had to add the option " --ppc 0.01 " because this was not in the tutorial and gave me an error when running plink without it
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P1.maf --allow-extra-chr  --read-genome TmsRS_P1.maf.ibs.genome  --out TmsRS_P1.maf.ibs4 --cluster  --matrix --ppc 0.01
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P2.maf --allow-extra-chr --read-genome TmsRS_P2.maf.ibs.genome  --out TmsRS_P2.maf.ibs4 --cluster  --matrix --ppc 0.01
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P1.maf --allow-extra-chr --read-genome Tge_alignedcoords_P1.maf.ibs.genome  --out Tge_alignedcoords_P1.maf.ibs4 --cluster  --matrix --ppc 0.01
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P2.maf --allow-extra-chr --read-genome Tge_alignedcoords_P2.maf.ibs.genome  --out Tge_alignedcoords_P2.maf.ibs4 --cluster  --matrix --ppc 0.01
+
+
+######## Performing an IBS distance matrix (--cluster --distance-matrix) ########
+
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P1.maf --allow-extra-chr  --read-genome TmsRS_P1.maf.ibs.genome  --out TmsRS_P1.maf.ibs5 --cluster  --distance-matrix --ppc 0.01
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P2.maf --allow-extra-chr --read-genome TmsRS_P2.maf.ibs.genome  --out TmsRS_P2.maf.ibs5 --cluster  --distance-matrix --ppc 0.01
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P1.maf --allow-extra-chr --read-genome Tge_alignedcoords_P1.maf.ibs.genome  --out Tge_alignedcoords_P1.maf.ibs5 --cluster  --distance-matrix --ppc 0.01
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P2.maf --allow-extra-chr --read-genome Tge_alignedcoords_P2.maf.ibs.genome  --out Tge_alignedcoords_P2.maf.ibs5 --cluster  --distance-matrix --ppc 0.01
+
+
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P1.maf --allow-extra-chr --read-genome TmsRS_P1.maf.ibs.genome  --out TmsRS_P1_mds1 --cluster  --mds-plot 4
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile TmsRS_P2.maf --allow-extra-chr --read-genome TmsRS_P2.maf.ibs.genome  --out TmsRS_P2_mds1 --cluster  --mds-plot 4
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P1.maf --allow-extra-chr --read-genome Tge_alignedcoords_P1.maf.ibs.genome  --out Tge_P1_mds1 --cluster  --mds-plot 4
+
+/home/susana/SOFTWARES/plink_linux_x86_64_20190617/plink --bfile Tge_alignedcoords_P2.maf --allow-extra-chr --read-genome Tge_alignedcoords_P2.maf.ibs.genome  --out Tge_P2_mds1 --cluster  --mds-plot 4
+
+png("mds1-strat.png");
+p <- read.table("TmsRS_P1_mds1.mds", header=T);
+p <- read.table("TmsRS_P2_mds1.mds", header=T);
+p <- read.table("Tge_P1_mds1.mds", header=T);
+p <- read.table("Tge_P2_mds1.mds", header=T);
+plot( p$C1 , p$C2 , pch=20 , cex=2 , col=p$SOL+1);
+dev.off();
+
+
 
 ## IBS (identity-by-state) similarity matrix
 # For the N individuals in a sample, to create a N x N matrix of genome-wide average IBS pairwise identities: 
@@ -1171,6 +1324,7 @@ vcftools --remove-indv Tms19_P2^M --vcf Tms.scaf.P1.vcf --out Tms.scaf.all-P1.vc
 
  
 
-
+## select random lines from a file
+cat asex4.maf.inter.ld | awk 'BEGIN {srand()} !/^$/ { if (rand() <= .01) print $0}' > sample.txt
 
 

@@ -1,4 +1,6 @@
 #! python
+## this script will collect the AO and DP values so that I can check the alternative and reference allele coverage (in no of reads) and check if it is skewd
+# you expect it to be skewed if heterozygous positions are polyploids
 
 import sys
 import getopt

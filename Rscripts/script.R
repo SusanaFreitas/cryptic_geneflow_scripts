@@ -950,13 +950,34 @@ library("dplyr")
 
 # read in the readable file (after sed/bash tweaking)
 # asex pops
-p1in <- read.delim("Tge_alignedcoords_P1.maf.inter.ld", header=T)
-p2in <- read.delim("Tge_alignedcoords_P2.maf.inter.ld", header=T)
-p1in <- read.delim("Tms_alignedcoords_P1.maf.inter.ld", header=T)
+p1in <- read.delim("files_per_pops/Tms/Tms_alignedcoords_P1.maf.inter.ld", header=T)
 p2in <- read.delim("Tms_alignedcoords_P2.maf.inter.ld", header=T)
 p2in <- read.delim("Tms.coord.P2.noutlie.maf.inter.ld", header=T)
 p1in$X <- NULL
-# changing the collumns names
+
+# resort Tms
+setwd("/home/susana/Dropbox/Timema_cryptic_geneflow/5_analyses/ld")
+p1in <- read.delim("files_per_pops/Tms-resort/TmsRS_P1.maf.inter.ld", header=T)
+p2in <- read.delim("files_per_pops/Tms-resort/TmsRS_P2.maf.inter.ld", header=T)
+p2in <- read.delim("files_per_pops/Tms-resort/no_hetoutliers/TmsRS_P2_noutlie.maf.inter.ld", header=T)
+## Tge
+p1in <- read.delim("files_per_pops/Tge/Tge_alignedcoords_P1.maf.inter.ld", header=T)
+p2in <- read.delim("files_per_pops/Tge/Tge_alignedcoords_P2.maf.inter.ld", header=T)
+
+
+# repeat with maf = 0.1
+# [ cd /home/susana/Dropbox/Timema_cryptic_geneflow/5_analyses/ld/files_per_pops/maf01 ]
+p1in <- read.delim("TgeP1_01.maf.inter.ld", header=T)
+p2in <- read.delim("TgeP2_01.maf.inter.ld", header=T)
+p1in <- read.delim("TmsP1_01.maf.inter.ld", header=T)
+p2in <- read.delim("TmsP2_01.maf.inter.ld", header=T)
+p1in <- read.delim("TgeP1.maf.inter.ld", header=T)
+p2in <- read.delim("TgeP2.maf.inter.ld", header=T)
+p1in <- read.delim("TmsP1.maf.inter.ld", header=T)
+p2in <- read.delim("TmsP2.maf.inter.ld", header=T)
+
+
+# changing the column names
 colnames(p1in) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 colnames(p2in) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 colnames(p1in)
@@ -980,30 +1001,31 @@ clohi <- read.delim("cloning-highrecomb.lg.maf.inter.ld")
 colnames(clohi) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 
 # selfing - no recombination
-selno <- read.delim("selfing-norecomb.lg.maf.inter.ld")
+## randomly sample lines
+[cd /home/susana/Dropbox/Timema_cryptic_geneflow/4_simulations/selfing-recomb3levels ]
+cat selfing-norecomb.lg.maf.inter.ld | awk 'BEGIN {srand()} !/^$/ { if (rand() <= .01) print $0}' > sample.selfing-norecomb.lg.maf.inter.ld
+sel1 <- read.delim("self1/self1.maf.inter.ld")
+colnames(selno) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 # selfing - low recombination
-sellow <- read.delim("selfing-lowrecomb.lg.maf.inter.ld")
+sel05 <- read.delim("self2/self2.maf.inter.ld")
+colnames(sel05) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 # selfing - high recombination
-selhi <- read.delim("selfing-highrecomb.lg.maf.inter.ld")
+sel01 <- read.delim("self3/self3.maf.inter.ld")
+colnames(sel01) <- c("CHR_A", "BP_A", "SNP_A", "CHR_B", "BP_B", "SNP_B", "R2")
 
 
 # make column with chr-chr
 p1in$inter <- paste(p1in$CHR_A,'-',p1in$CHR_B, sep='')
 p2in$inter <- paste(p2in$CHR_A,'-',p2in$CHR_B, sep='')
 
-clono$inter <- paste(clono$CHR_A,'-',clono$CHR_B, sep='')
-clolo$inter <- paste(clolo$CHR_A,'-',clolo$CHR_B, sep='')
-clohi$inter <- paste(clohi$CHR_A,'-',clohi$CHR_B, sep='')
-
-selno$inter <- paste(selno$CHR_A,'-',selno$CHR_B, sep='')
-sello$inter <- paste(sello$CHR_A,'-',sello$CHR_B, sep='')
-selhi$inter <- paste(selhi$CHR_A,'-',selhi$CHR_B, sep='')
-
+# sexual species
 tce$inter <- paste(tce$CHR_A,'-',tce$CHR_B, sep='')
 
-
+library("dplyr")
+p1in %>% group_by(inter) %>% summarize(count=n())
 # confirm if we are doing it correctly
 chr_unq <- unique(p1in$inter)
+chr_unq <- unique(p2in$inter)
 length(chr_unq)
 # 91 
 ### GOOD!! continue :)
@@ -1027,10 +1049,10 @@ print(myplot)
 dev.off()
 
 ## reorder x axis labels
-tce$inter2 <- factor(tce$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
+p1in$inter2 <- factor(p1in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
 				"lg9-lg9", "lg10-lg10", "lg11-lg11", "lg12-lg12", "lgX-lgX",
 				"lg1-lg2", "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6", "lg1-lg7", "lg1-lg8", "lg1-lg9",
-				"lg1-lg10", "lg1-lg11", "lg1-lg12", "lg1-lgX",
+				"lg1-lg10", "lg10-lg1", "lg1-lg11", "lg11-lg1", "lg1-lg12", "lg12-lg1", "lg1-lgX",
 				"lg2-lg3", "lg2-lg4", "lg2-lg5", "lg2-lg6", "lg2-lg7", "lg2-lg8", "lg2-lg9", "lg10-lg2",
 				"lg11-lg2", "lg12-lg2", "lg2-lgX",
 				"lg3-lg4", "lg3-lg5", "lg3-lg6", "lg3-lg7", "lg3-lg8", "lg3-lg9", "lg10-lg3", "lg11-lg3",
@@ -1045,7 +1067,45 @@ tce$inter2 <- factor(tce$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4
 				"lg10-lg11", "lg10-lg12", "lg10-lgX",
 				"lg11-lg12", "lg11-lgX",
 				"lg12-lgX"))
-p1in$inter2 <- factor(p1in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
+
+# to plot in grey the groups with very low R2 points
+# all including lg 2,7,8,9
+p1in$variable_grouping <- ifelse(p1in$inter %in% c("lg2-lg2", "lg7-lg7", "lg8-lg8",
+				"lg9-lg9", "lg12-lg12", "lg1-lg12", "lg12-lg2","lg12-lg3", "lg12-lg4",
+				"lg1-lg2", "lg1-lg7", "lg1-lg8", "lg1-lg9", "lg12-lg5", "lg12-lg6",
+				"lg2-lg3", "lg2-lg4", "lg2-lg5", "lg2-lg6", "lg2-lg7", "lg2-lg8", "lg2-lg9", "lg10-lg2",
+				"lg11-lg2", "lg12-lg2", "lg2-lgX", "lg12-lg7", "lg12-lg8",
+				"lg3-lg7", "lg3-lg8", "lg3-lg9", "lg12-lg9",
+				"lg4-lg7", "lg4-lg8", "lg4-lg9", "lg10-lg12",
+				"lg5-lg7", "lg5-lg8", "lg5-lg9", "lg11-lg12",
+				"lg6-lg7", "lg6-lg8", "lg6-lg9",
+				"lg7-lg8", "lg7-lg9", "lg10-lg7", "lg11-lg7", "lg12-lg7", "lg7-lgX",
+				"lg8-lg9", "lg10-lg8", "lg11-lg8", "lg12-lg8", "lg8-lgX",
+				"lg10-lg9", "lg11-lg9", "lg12-lg9", "lg9-lgX"), 'low',
+								 ifelse(p1in$inter %in% c("lg1-lg1","lg4-lg4","lg6-lg6",
+														   "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6",
+														   "lg1-lg10", "lg1-lg11", "lg1-lgX",
+														   "lg3-lg4", "lg3-lg6", "lg4-lg5", "lg4-lg6",
+														   "lg10-lg4", "lg11-lg4", "lg4-lgX", "lg5-lg6",
+														    "lg10-lg6", "lg11-lg6", "lg6-lgX"), 'medium', 'high'))
+
+## this is to plot according to total number of R2 points
+p1in$inter2 <- factor(p1in$inter, levels = c("lg9-lg9" , "lg2-lg9" , "lg2-lg7" , "lg2-lg8" , "lg7-lg9" ,
+											 "lg2-lg6" , "lg8-lg9" , "lg2-lg4" , "lg7-lg7" , 
+"lg1-lg2" , "lg8-lg8" , "lg6-lg9" , "lg4-lg9" , "lg2-lgX" , "lg1-lg9" , "lg2-lg3" , "lg7-lg8" , "lg9-lgX" ,
+"lg3-lg9" , "lg6-lg6" , "lg6-lg7" , "lg4-lg7" , "lg6-lg8" , "lg4-lg4" , "lg4-lg8" , "lg11-lg2" , "lg1-lg7" ,
+"lg10-lg2" , "lg1-lg8" , "lg7-lgX" , "lg2-lg5" , "lg4-lg6" , "lg1-lg1" , "lg8-lgX" , "lg11-lg9" , "lg3-lg7" ,
+"lg1-lg6" , "lg10-lg9" , "lg3-lg8" , "lg1-lg4" , "lg5-lg9" , "lg6-lgX" , "lg4-lgX" , "lgX-lgX" , "lg3-lg6" ,
+"lg3-lg4" , "lg1-lgX" , "lg11-lg7" , "lg1-lg3" , "lg11-lg8" , "lg3-lg3" , "lg10-lg7" , "lg10-lg8" , "lg5-lg7" ,
+"lg3-lgX" , "lg5-lg8" , "lg11-lg6" , "lg11-lg4" , "lg10-lg6" , "lg10-lg4" , "lg1-lg11" , "lg5-lg6" , "lg4-lg5" ,
+"lg1-lg10" , "lg11-lgX" , "lg1-lg5" , "lg10-lgX" , "lg11-lg3" , "lg5-lgX" , "lg10-lg3" , "lg11-lg11" , "lg3-lg5" ,
+"lg10-lg10" , "lg10-lg11" , "lg5-lg5" , "lg11-lg5" , "lg10-lg5"))
+
+
+
+
+
+p2in$inter2 <- factor(p2in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "lg4-lg4", "lg5-lg5", "lg6-lg6", "lg7-lg7", "lg8-lg8",
 				"lg9-lg9", "lg10-lg10", "lg11-lg11", "lg12-lg12", "lgX-lgX",
 				"lg1-lg2", "lg1-lg3", "lg1-lg4", "lg1-lg5", "lg1-lg6", "lg1-lg7", "lg1-lg8", "lg1-lg9",
 				"lg1-lg10", "lg1-lg11", "lg1-lg12", "lg1-lgX",
@@ -1069,29 +1129,43 @@ p1in$inter2 <- factor(p1in$inter, levels = c("lg1-lg1", "lg2-lg2", "lg3-lg3", "l
 #sub_p2in <- p1in[!(p2in$R2>=1),]
 
 # make error bars
-errbar_lims = group_by(tce, inter2) %>%
-summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
-upper=mean+(2*se), lower=mean-(2*se))
-
 errbar_lims = group_by(p1in, inter2) %>%
 summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
 upper=mean+(2*se), lower=mean-(2*se))
 
+errbar_lims = group_by(p2in, inter2) %>%
+summarize(mean=mean(R2), se=sd(R2)/sqrt(n()),
+upper=mean+(2*se), lower=mean-(2*se))
+
+table_counts <- p1in %>% 
+  group_by(inter2) %>%
+  summarise(no_rows = length(inter2)) %>%
+as.data.frame
+
 
 ##### final commands to make the main plot: all pairwise comparisons
 mean_se_violin =  ggplot() + 
-	geom_violin(data=tce, aes(x= inter2, y = R2, colour=inter2)) +
-	geom_point(data=tce, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
-	geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
-	theme_minimal() +
-	theme(axis.text.x = element_text(angle = 45, size=10,  hjust=1), legend.position = "none")
-
-mean_se_violin =  ggplot() + 
-	geom_violin(data=p1in, aes(x= inter2, y = R2, colour=inter2)) +
+	geom_violin(data=p1in, aes(x= inter2, y = R2, colour=variable_grouping)) +
 	geom_point(data=p1in, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
 	geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
 	theme_minimal() +
-	theme(axis.text.x = element_text(angle = 45, size=10,  hjust=1), legend.position = "none")
+	theme(axis.text.x = element_text(angle = 90, size=10,  hjust=1), legend.position = "none") +
+	geom_text(data=table_counts,aes(x = inter2, y = 1.05, label=no_rows),color="red", angle = 90) +
+	scale_color_manual(values=c("darkolivegreen3","grey", "gold3"))
+	
+mean_se_violin =  ggplot() + 
+	geom_violin(data=p2in, aes(x= inter2, y = R2, colour=inter2)) +
+	geom_point(data=p2in, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
+	geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
+	theme_minimal() +
+	theme(axis.text.x = element_text(angle = 90, size=10,  hjust=1), legend.position = "none") +
+	geom_text(data=table_counts,aes(x = inter2, y = 1.05, label=no_rows),color="red", angle = 90)
+
+
+library(dplyr)
+count<-df %>% filter(!is.na(value)) %>%
+group_by(variable) %>%
+summarise(n=n())
 
 mean_se_boxplot = ggplot() + 
   geom_boxplot(data=tce, aes(x= inter2, y = R2, colour=inter2),outlier.colour="azure3", outlier.shape=16,
@@ -1099,10 +1173,10 @@ mean_se_boxplot = ggplot() +
   geom_point(data=tce, aes(x= inter2, y=R2), stat="summary", fun.y=mean, fun.ymax=mean, fun.ymin=mean, size=1) +
   geom_errorbar(aes(x=errbar_lims$inter2, ymax=errbar_lims$upper, ymin=errbar_lims$lower), stat='identity', width=.25) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, size=4,  hjust=1), legend.position = "none")
+  theme(axis.text.x = element_text(angle = 90, size=4,  hjust=1), legend.position = "none")
 
 	
-png("Tce_random_ld_coords-boxplot.png", width = 480, height = 480)
+png("TmsP1_uniq_nohits_colour.png", width = 1000, height = 480)
 print(mean_se_violin)
 print(mean_se_boxplot)
 dev.off()
@@ -1124,12 +1198,29 @@ ggplot(p1in, aes(dist, r2)) +
 
 
 # read in the readable file (after sed/bash tweaking)
-p1dec <- read.delim("Tge.P1.coord.decay.ld", header=T)
+p2dec <- read.delim("Tge.P1.coord.decay.ld", header=T)
 p2dec <- read.delim("Tge.P2.coord.decay.ld", header=T)
 
 p1dec <- read.delim("Tms.P1.coord.decay.ld", header=T)
 p2dec <- read.delim("Tms.P2.coord.decay.ld", header=T)
 p2dec <- read.delim("Tms.coord.P2.noutlie.maf.decay.ld", header=T)
+## Tms resort bams (without multialigned reads)
+p1dec <- read.delim("files_per_pops/Tms-resort/TmsRS_P1.maf.decay.ld", header=T)
+p2dec <- read.delim("files_per_pops/Tms-resort/TmsRS_P2.maf.decay.ld", header=T)
+p2dec <- read.delim("files_per_pops/Tms-resort/no_hetoutliers/TmsRS_P2_noutlie.maf.decay.ld", header=T)
+
+
+p1dec <- read.delim("TgeP1_01.maf.decay.ld", header=T)
+p2dec <- read.delim("TgeP2_01.maf.decay.ld", header=T)
+
+p1dec <- read.delim("TmsP1_01.maf.decay.ld", header=T)
+p2dec <- read.delim("TmsP2_01.maf.decay.ld", header=T)
+
+p1dec <- read.delim("TgeP1.maf.decay.ld", header=T)
+p2dec <- read.delim("TgeP2.maf.decay.ld", header=T)
+
+p1dec <- read.delim("TmsP1.maf.decay.ld", header=T)
+p2dec <- read.delim("TmsP2.maf.decay.ld", header=T)
 
 
 
@@ -1142,11 +1233,11 @@ clolow <- read.delim("cloning-lowrecomb.lg.decay.ld")
 tce <- read.delim("cloning-highrecomb.lg.decay.ld")
 
 # selfing - no recombination
-selno <- read.delim("selfing-norecomb.lg.decay.ld")
+selno <- read.delim("highrecomb/selfing-norecomb.lg.decay.ld")
 # selfing - low recombination
-sellow <- read.delim("selfing-lowrecomb.lg.decay.ld")
+sellow <- read.delim("lowrecomb/selfing-lowrecomb.lg.decay.ld")
 # selfing - high recombination
-selhi <- read.delim("selfing-highrecomb.lg.decay.ld")
+selhi <- read.delim("norecomb/selfing-highrecomb.lg.decay.ld")
 
 
 
@@ -1283,15 +1374,14 @@ plotX<-ggplot(subX, aes(distance, R2)) +
   ggtitle("lgX") +
   theme(axis.text = element_text(size=6))
 
-pdf("Tms_pop2_noutlie_LDdecay.pdf", width = 10, paper = 'a4')
-png("Tms_pop2_noutlie_LDdecay.png", width = 480, height = 480)
+png("TmsP2_uniq_LDdecay.png", width = 1000, height = 480)
 grid.arrange(plot1, plot2, plot3, plot4, plot5, plot6, plot7, plot8,
              plot9, plot10, plot11, plot12, plotX, ncol=4)
 
 dev.off()
 
 
-ggplot(p2dec, aes(distance, R2)) +
+ggplot(p1dec, aes(distance, R2)) +
   geom_point() +
   facet_grid(CHR_A ~ .) +
   geom_smooth(formula=distance ~ R2, se=F)
@@ -1318,8 +1408,8 @@ library(hrbrthemes)
 # asex pops
 p1in <- read.delim("Tge_alignedcoords_P1.maf.inter.ld", header=T)
 p2in <- read.delim("Tge_alignedcoords_P2.maf.inter.ld", header=T)
-p1in <- read.delim("Tms_alignedcoords_P1.maf.inter.ld", header=T)
-p2in <- read.delim("Tms_alignedcoords_P2.maf.inter.ld", header=T)
+p1in <- read.delim("files_per_pops/Tms-resort/TmsRS_P1.maf.inter.ld", header=T)
+p2in <- read.delim("files_per_pops/Tms-resort/TmsRS_P2.maf.inter.ld", header=T)
 
 ## To calculate mean per lg-lg interaction we will make a new column
 # make column with chr-chr
@@ -1357,32 +1447,28 @@ dat4 <- dat3[,c(2,1,3)]
 colnames(dat3) <- c("lga", "lgb", "R2")
 colnames(dat4) <- c("lga", "lgb", "R2")
 dat5 <- rbind(dat3, dat4)
-dat5$lga <- factor(dat5$lga, levels = c("lg1", "lg2", "lg3", "lg4", "lg5", "lg6", "lg7", "lg8",
-				"lg9", "lg10", "lg11", "lg12", "lgX"))
-dat5$lgb <- factor(dat5$lgb, levels = c("lg1", "lg2", "lg3", "lg4", "lg5", "lg6", "lg7", "lg8",
-				"lg9", "lg10", "lg11", "lg12", "lgX"))
-
+dat5$lga <- factor(dat5$lga, levels = c("lg5", "lg10", "lg11", "lgX", "lg3", 
+				  "lg12", "lg1", "lg6", "lg9", "lg4", "lg8", "lg7", "lg2"))
+dat5$lgb <- factor(dat5$lgb, levels = c("lg5", "lg10", "lg11", "lgX", "lg3", 
+				  "lg12", "lg1", "lg6", "lg9", "lg4", "lg8", "lg7", "lg2"))
+dat5$lga <- factor(dat5$lga, levels = c("lg1", "lg2", "lg3", "lg4", "lg5", 
+				  "lg6", "lg7", "lg8", "lg9", "lg10", "lg11", "lg12", "lgX"))
+dat5$lgb <- factor(dat5$lgb, levels = c("lg1", "lg2", "lg3", "lg4", "lg5", 
+				  "lg6", "lg7", "lg8", "lg9", "lg10", "lg11", "lg12", "lgX"))
 ## test before printing
 ggplot(data = dat5, aes(x = lga, y = lgb)) +
-  geom_tile(aes(fill = R2)) 
-
-png("Tms_pop1_heatmap.png", width = 580, height = 480)
-png("Tms_pop2_heatmap.png", width = 580, height = 480)
+  geom_tile(aes(fill = R2))
+  
+  
+png("TmsRS_pop1_heatmap_sort.png", width = 580, height = 480)
+png("TmsRS_pop2_heatmap.png", width = 580, height = 480)
 ggplot(data = dat5, aes(x = lga, y = lgb)) +
-  geom_tile(aes(fill = R2)) +
-  ggtitle(label = "Tms - pop 2 - LD per lg") +
+  geom_tile(aes(fill = R2, order=TRUE)) +
+  ggtitle(label = "TmsRS - pop 1 - LD per lg") +
     #edit legends : guide = guide_legend(reverse = TRUE) will reverse the order in the legend
   scale_fill_distiller(palette="RdPu", trans = "reverse", guide = guide_legend(reverse = TRUE)) +
   theme_ipsum()
 dev.off()
-
-
-
-
-
-
-
-
 
 
 
