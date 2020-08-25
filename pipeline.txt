@@ -39,6 +39,11 @@ library("ggplot2", lib.loc="/users/sfreitas1/R")
 6) SAMTOOLS: sort, filter only aligned reads and index samples (read groups are added during the bwa alignment)
 	script: 06-sortfilter.sh
 
+for i in $(cat inds); do
+samtools view -S -h $i-trim3_map.sam | grep -v -e 'XA:Z:' -e 'SA:Z:' | samtools view -b -h -F 0x100 -q 30 - | samtools sort -o $i-filtered.bam - ;
+samtools index $i-filtered.bam;
+done
+
 7.1 ) STACKS
 
 filter MAPQ > 30
