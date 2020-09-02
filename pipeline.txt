@@ -58,6 +58,7 @@ Call SNPs
 
 8) Filtering
 ## I will also count the number of reads per position, so that I can decide an appropriate DP cutoff.
+	- Tms_seq: after checking DP per indvidual, the 8 - 200 cuttoff is still appropriate, so I won't change it.
 
 8.1) FILTER BY 8 < DP < 200
 	8.1.2) Resorted Tms bam files were filtered with more conservative parameters: 8 < DP < 100
@@ -175,6 +176,10 @@ for ((i=3; i<=96; i +=2)); do cut -f $i,$((i+1)) Tms.trim2.fb.DP.table | awk '$1
 for ((i=3; i<=96; i +=2)); do cut -f $i,$((i+1)) Tms.trim3.fb.DP.table | awk '$1 != "./." {print $2}' > $i.DP; done
 for ((i=3; i<=96; i +=2)); do cut -f $i,$((i+1)) Tdi.fb.DP.table | awk '$1 != "./." {print $2}' > $i.DP; done
 for ((i=3; i<=96; i +=2)); do cut -f $i,$((i+1)) Tsi.fb.DP.table | awk '$1 != "./." {print $2}' > $i.DP; done
+
+for ((i=3; i<=96; i +=2)); do cut -f $i,$((i+1)) TmsFS13.DP.table | awk '$1 != "./." {print $2}' > $i.DP; done
+for ((i=3; i<=96; i +=2)); do cut -f $i,$((i+1)) TmsFS15.DP.table | awk '$1 != "./." {print $2}' > $i.DP; done
+for ((i=3; i<=96; i +=2)); do cut -f $i,$((i+1)) TmsSyc13.DP.table | awk '$1 != "./." {print $2}' > $i.DP; done
 
 
 #### R ####
