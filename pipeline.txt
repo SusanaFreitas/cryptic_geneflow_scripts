@@ -67,6 +67,9 @@ Call SNPs
 
 8.3) Break MNPs into SNPs
 
+8.4) Remove low coverage individuals
+Because the individuals are very similar to each other, I prefer to invest on having more positions, than more individuals. So I will try to have a very conservative approach on the individuals kept - only keeping individuals
+
 8.4) FILTER BY missing data < 25%
 
 8.5) FILTER BY allelic no (keep only SNPs)
@@ -308,28 +311,68 @@ eval $alprim -kg Tms.QUALpy.vcf > Tms.fb_posvcflib.vcf
 eval $alprim -kg Tms.trim2.QUALpy.vcf > Tms.trim2_posvcflib.vcf
 eval $alprim -kg Tms.trim3.QUALpy.vcf > Tms.trim3_posvcflib.vcf
 
-
 ## command line: Tge
 vcflib vcfallelicprimitives -kg Tge.trim2-test.py.out.vcf > Tge.trim2-test_posvcflib.vcf
 vcflib vcfallelicprimitives -kg Tge.trim2.py.out.vcf > Tge.trim2_posvcflib.vcf
 vcflib vcfallelicprimitives -kg Tge.trim3.py.out.vcf > Tge.trim3_posvcflib.vcf
 
-vcflib vcfallelicprimitives -kg Tms.fb.QUALpy.vcf > Tms.fb_posvcflib.vcf
-vcflib vcfallelicprimitives -kg Tms.trim2.QUALpy.vcf > Tms.trim2_posvcflib.vcf
-vcflib vcfallelicprimitives -kg Tms.trim3.QUALpy.vcf > Tms.trim3_posvcflib.vcf
-
 vcflib vcfallelicprimitives -kg Tsi.QUALpy.vcf > Tsi.posvcflib.vcf
 vcflib vcfallelicprimitives -kg Tdi.QUALpy.vcf > Tdi.posvcflib.vcf
 vcflib vcfallelicprimitives -kg Tge.py.out.vcf > Tge.posvcflib.vcf
 
+## command line: re-seq (TmsFS13, TmsFS15, TmsSyc13, Tdi, Tsi)
+vcflib vcfallelicprimitives -kg TmsFS13_QUALpy.vcf > TmsFS13_posvcflib.vcf
+vcflib vcfallelicprimitives -kg TmsFS15_QUALpy.vcf > TmsFS15_posvcflib.vcf
+vcflib vcfallelicprimitives -kg TmsSyc13_QUALpy.vcf > TmsSyc13_posvcflib.vcf
+vcflib vcfallelicprimitives -kg Tsi_QUALpy.vcf > Tsi_posvcflib.vcf
+vcflib vcfallelicprimitives -kg TdiP1_QUALpy.vcf > TdiP1_posvcflib.vcf
+vcflib vcfallelicprimitives -kg TdiP2_QUALpy.vcf > TdiP2_posvcflib.vcf
+vcflib vcfallelicprimitives -kg Tte_QUALpy.vcf > Tte_posvcflib.vcf
 
 
 ###########################################################################
-##################### 8.4) Filter by missing data #########################
+################ 8.4) Remove low coverage individuals #####################
 ###########################################################################
+## check if some individuals have very low coverage
+vcftools --vcf Tsi.posvcflib.vcf --geno-depth --out Tsi
 
-## first check if some individuals have very low coverage
-vcftools --vcf Tsi.posvcflib.vcf --depth --out Tsi
+
+################# Tge #################
+## low DP samples: to be removed
+Gepop2.2
+Gepop2.5
+Gepop2.6
+Gepop1.17
+Gepop1.11
+Gepop1.3
+
+################# Tms #################
+- Individuals removed:
+Tms18_P2 and Tms17_P1
+
+
+################# Tdi #################
+- Individuals removed from Tdi P1 (from a total of 24):
+Tdi8_P1
+Tdi14_P1
+Tdi20_P1
+Tdi21_P1
+- Individuals removed from Tdi P2 (from a total of 24):
+Tdi17_P2
+Tdi14_P2
+Tdi11_P2
+Tdi13_P2
+Tdi23_P2
+Tdi5_P2
+Tdi6_P2
+
+
+
+
+
+###########################################################################
+##################### 8.5) Filter by missing data #########################
+###########################################################################
 
 
 	- exclude all sites with 25% or more missing genotype
@@ -350,18 +393,13 @@ vcftools --recode --recode-INFO-all --vcf Tdi.posvcflib.vcf --max-missing 0.75 -
 # Gepop2.19, Gepop2.20, Gepop2.21, Gepop2.22, Gepop2.23
 
 
-
-
-
-
-
-
-
+vcftools --recode --recode-INFO-all --vcf TdiP1_posvcflibcov.vcf --max-missing 0.75 --out TdiP1_missfilt
+vcftools --recode --recode-INFO-all --vcf TdiP2_posvcflibcov.vcf --max-missing 0.75 --out TdiP2_missfilt
 
 
 
 ###########################################################################
-###################### 8.5) Filter by allelic no ##########################
+###################### 8.6) Filter by allelic no ##########################
 ###########################################################################
 
 	- keep Only biallelic SNPs
@@ -411,7 +449,7 @@ vcflib vcfkeepsamples Tcm.bial3.vcf tcm_m8.bam tcm_m3.bam tcm_m38.bam tcm_m36.ba
 	tcm_m31.bam tcm_m2.bam tcm_m24.bam tcm_m23.bam tcm_m1.bam tcm_f1.bam tcm_f12.bam tcm_f10.bam tcm_f11.bam \
 	tcm_m6.bam tcm_m20.bam tcm_m11.bam tcm_m22.bam tcm_m15.bam tcm_m13.bam tcm_m14.bam tcm_m16.bam > Tcm_sample23.vcf
 
-## filter only SNPs tjat are aligned and have lg coordinates
+## filter only SNPs that are aligned and have lg coordinates
 python3 '/home/susana/Dropbox/Timema_cryptic_geneflow/cryptic_geneflow_scripts/filter_Mummer_snps.py' -i Tcm_sample23.vcf -d 2_Tcm_scf_block_alignment.tsv -o Tcm_alignedcoords.vcf -s Tcm
 
 python3 '/home/susana/Dropbox/Timema_cryptic_geneflow/cryptic_geneflow_scripts/filter_Mummer_snps.py' -i Tce_sample23.vcf -d 3_Tce_scf_block_alignment.tsv -o Tce_alignedcoords.vcf -s Tce
