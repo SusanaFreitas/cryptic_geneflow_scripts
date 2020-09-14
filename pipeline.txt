@@ -77,8 +77,16 @@ Because the individuals are very similar to each other, I prefer to invest on ha
 8.6) Select only SNPs that fall into the overlap between aligned scaffolds with Nosil's genome - these are the SNPs that have lg coordinates and we can use to calculate LD decay
 python3 vcfmerge_scafs_lg.py
 
+9) Run whole genome sequenced samples in the kmer pipeline to check heterozygosity. The goal is to make sure the high heterozygosity individuals are not polyploids. Because all Tms males are high heterozygosity inds, we will run:
 
-
+##Tms F
+MS_Alp03b*
+##Tce F
+CC22B*
+##Tce M
+06_HM16*
+## Tms M
+26_15056
 
 ## code names (by Kamil)
 
@@ -565,6 +573,59 @@ cat header lg*txt.uniq > Tge_alignedcoords_uniq.vcf
 
 ## get only the GT
 vcftools --vcf Tge_P1_coords.uniq.vcf --extract-FORMAT-info GT --out TgeP1
+
+
+
+######################################################################
+################## genome stats - kmer pipeline ######################
+######################################################################
+
+
+## cat all fastq.gz files into one (per sample):
+
+##Tms F
+MS_Alp03b*
+cat MS_Alp03b*_R1* > Tms_F_MS_Alp03b_R1.fastq.gz
+cat MS_Alp03b*_R2* > Tms_F_MS_Alp03b_R2.fastq.gz
+
+##Tce F
+CC22B*
+cat CC22B*_R1_* > Tce_F_CC22B_R1.fastq.gz
+cat CC22B*_R2_* > Tce_F_CC22B_R2.fastq.gz
+
+##Tce M
+06_HM16*
+cat 06_HM16*_R1_* > Tce_M_06_HM16_R1.fastq.gz
+cat 06_HM16*_R2_* > Tce_M_06_HM16_R2.fastq.gz
+
+## Tms M
+26_15056*_R1_* > Tms_M_26_15056_R1.fastq.gz
+26_15056*_R2_* > Tms_M_26_15056_R2.fastq.gz
+
+
+
+4.1) Ploidy and Heterozygosity with Genomescope and Smudgeplot
+
+    Kmer count with KMC
+        install KMC in /scratch/wally/FAC/FBM/DEE/tschwand/default/sfreitas/softwares/
+        run kmc with screen
+        get hist from kmc output
+
+$ tar -xf KMC*tar.gz
+$ screen
+$ mkdir tmp
+$ ls Coci-NEP-7*trim2* > Coci-NEP-7.txt
+$ (...)
+$ srun -p axiom --nodes 1 --ntasks=10 --mem=64GB --time 10-00:00:0 --account=tschwand_default --pty bash 
+$ ./kmc -k21 -t10 -m64 -ci1 -cs10000 @Coci-NEP-7.txt Coci-NEP-7 tmp
+
+Explaining the options:
+
+    '-m64' means using no more than 64GB RAM.
+    The part ‘/share/data/D-ecoli-10K-ilmn/z1.fastq’ is the input file in FASTQ format. Please note that kmc can read gzip files as well.
+    'reads' is the name of the output database.
+    The final word (‘tmp’) is a folder (previously created by me) where the temporary files are stored. It is cleaned after kmc completes execution.
+
 
 
 
