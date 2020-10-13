@@ -1,0 +1,17 @@
+### Run Freebayes on all Tms
+Because when I run all samples freebayes get really slow, I will try to use parallel
+
+1) Install Freebayes
+git clone --recursive git://github.com/ekg/freebayes.git
+
+# Use screen
+freebayes freebayes-parallel
+
+
+```
+$ srun -p axiom --nodes 1 --ntasks=16 --mem=450GB --time 10-00:00:0 --account=tschwand_default --pty bash
+```
+´´´
+test
+´´´
+
