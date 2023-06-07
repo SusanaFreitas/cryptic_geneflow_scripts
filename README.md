@@ -24,157 +24,17 @@ Tdi
 
 
 
-T. genevievae
-Tge
-T. monikensis
-Tms
-T. di
-T. si
+Species codes:
+Tge - Timema genevievae
+Tms - Timema monikensis
+Tdi - Timema douglasi
+Tsi - Timema shepardi
+
 Pop1
-HW20
-Sycamore
+HW20 - Tge
+Sycamore - Tms
 
 
 Pop2
-Antonio
-For sale
-
-
-“age”
-Oldest asexual Timema
-2nd youngest asexual Timema
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Notes about the sequencing:
-Tge – DNA extraction and sequencing performed by Zoe
-Tms – DNA extraction performed by Chloe, sequencing by Marjorie
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Heterozygosity
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Overall analysis of the data
-
-Tge
-
-
-
-
-
-
-
-
-
-
-Tms
-
+Antonio - Tge
+For sale - Tms
